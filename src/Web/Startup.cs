@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using Web.Data;
+using Web.Extensions;
 
 namespace Web
 {
@@ -68,7 +69,7 @@ namespace Web
                 app.UseHsts();
             }
 
-            app.MigrateApplicationDbContext<ApplicationDbContext>();
+            app.MigrateApplicationDbContext();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
