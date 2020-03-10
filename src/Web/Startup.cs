@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using Web.Data;
+using Persistence.Data;
 using Web.Extensions;
 
 namespace Web
@@ -49,6 +49,7 @@ namespace Web
                     options.Password.RequireLowercase = false;
                     options.Password.RequireUppercase = false;
                 })
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -70,6 +71,8 @@ namespace Web
             }
 
             app.MigrateApplicationDbContext();
+            app.AddDefaultUsers();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

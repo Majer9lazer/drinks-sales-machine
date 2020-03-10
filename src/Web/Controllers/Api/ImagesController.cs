@@ -4,7 +4,7 @@ using Persistence.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Web.Data;
+using Persistence.Data;
 
 namespace Web.Controllers.Api
 {

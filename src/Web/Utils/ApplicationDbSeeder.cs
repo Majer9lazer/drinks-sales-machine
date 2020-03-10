@@ -1,5 +1,5 @@
-﻿using Persistence.Entities;
-using Web.Data;
+﻿using Persistence.Data;
+using Persistence.Entities;
 
 namespace Web.Utils
 {
