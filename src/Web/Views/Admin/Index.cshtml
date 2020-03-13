@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<h3>Drink Sales Machine Administration</h3>
+
+<div class="container-fluid">
+
+</div>
+@section Scripts
+{
+    <script>
+        const coinOperationsConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/adminOperationsHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        coinOperationsConnection.start().then(function() {
+            console.log("connected");
+        });
+    </script>
+    <script>
+
+    </script>
+}

@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
 
@@ -37,6 +36,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="App_Data\DrinkSalesMachine_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="App_Data\DrinksSalesMachine.mdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="App_Data\DrinksSalesMachine_log.ldf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

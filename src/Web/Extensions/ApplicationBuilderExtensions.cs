@@ -35,7 +35,7 @@ namespace Web.Extensions
 
         public static IApplicationBuilder AddDefaultUsers(this IApplicationBuilder app)
         {
-            const string adminName = "admin";
+            const string adminName = "admin@mail.ru";
             const string adminPassword = "admin123";
 
             var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();

@@ -21,6 +21,7 @@ namespace Persistence.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<Image>().HasData(ApplicationDbDefaultValuesContainer.GetDefaultImages());
             builder.Entity<Coin>().HasData(ApplicationDbDefaultValuesContainer.GetDefaultCoins());
             builder.Entity<Drink>().HasData(ApplicationDbDefaultValuesContainer.GetDefaultDrinks());
             base.OnModelCreating(builder);

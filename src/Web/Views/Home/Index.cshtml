@@ -6,3 +6,27 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+<div class="container-fluid" id="mainBlock">
+    <h4>Images</h4>
+    <hr />
+    <div v-for="image in images">
+        <img :src="image.path" :data-id="image.id"/>
+    </div>
+</div>
+@section Scripts
+{
+    <script>
+        var mainBlockVue = new Vue({
+            el: '#mainBlock',
+            data: {
+                images: []
+            },
+            created: async function () {
+                var imagesResponse = await window.axios.get('/api/images');
+                console.log(imagesResponse);
+                this.images = imagesResponse.data;
+
+            }
+        });
+    </script>
+}

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Persistence.Data;
 using Web.Extensions;
+using Web.Hubs;
 
 namespace Web
 {
@@ -38,9 +39,10 @@ namespace Web
                 {
                     throw new InvalidOperationException($"There must be {ContentRootPathName} in connection string in 'AttachDbFileName' Block");
                 }
-
             });
 
+            services.AddApplicationServices();
+            
             services.AddDefaultIdentity<IdentityUser>(options =>
                 {
                     options.Password.RequireDigit = true;
@@ -54,7 +56,7 @@ namespace Web
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,11 +87,11 @@ namespace Web
 
             app.UseEndpoints(endpoints =>
             {
-
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
+
+                endpoints.MapHub<PaymentHub>("/paymentHub");
+                endpoints.MapHub<AdminOperationsHub>("/adminOperationsHub");
             });
         }
     }

@@ -10,11 +10,7 @@ namespace Persistence.Entities
         public string Name { get; set; }
         public int Value { get; set; }
 
-        /// <summary>
-        /// Состояние 
-        /// </summary>
-        /// <example>0(заблокирована),1(разблокирована)</example>
-        public byte State { get; set; }
+        public int ImageId { get; set; }
 
         public virtual Image Image { get; set; }
     }

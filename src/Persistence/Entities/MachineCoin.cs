@@ -10,5 +10,9 @@ namespace Persistence.Entities
         public Coin Coin { get; set; }
         public Machine Machine { get; set; }
 
+        /// <summary>
+        /// Состояние <example>0(заблокирована),1(разблокирована)</example>
+        /// </summary>
+        public byte CoinState { get; set; }
     }
 }
