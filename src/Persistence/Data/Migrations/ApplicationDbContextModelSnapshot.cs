@@ -249,6 +249,36 @@ namespace Persistence.Data.Migrations
                     b.HasIndex("MachineId");
 
                     b.ToTable("Coins");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "1.руб",
+                            State = (byte)1,
+                            Value = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "2.руб",
+                            State = (byte)1,
+                            Value = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "5.руб",
+                            State = (byte)1,
+                            Value = 5
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "10.руб",
+                            State = (byte)1,
+                            Value = 10
+                        });
                 });
 
             modelBuilder.Entity("Persistence.Entities.Drink", b =>
@@ -277,6 +307,26 @@ namespace Persistence.Data.Migrations
                     b.HasIndex("MachineId");
 
                     b.ToTable("Drinks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Coca Cola",
+                            Price = 35.0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Fanta",
+                            Price = 40.0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Pepsi",
+                            Price = 70.0
+                        });
                 });
 
             modelBuilder.Entity("Persistence.Entities.Image", b =>
@@ -323,13 +373,43 @@ namespace Persistence.Data.Migrations
                     b.Property<int?>("MachineId")
                         .HasColumnType("int");
 
+                    b.Property<long?>("PaymentId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CoinId");
 
                     b.HasIndex("MachineId");
 
+                    b.HasIndex("PaymentId");
+
                     b.ToTable("MachineCoins");
+                });
+
+            modelBuilder.Entity("Persistence.Entities.Payment", b =>
+                {
+                    b.Property<long>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("IdentityUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("MachineId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("PaymentDateUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("IdentityUserId");
+
+                    b.HasIndex("MachineId");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -410,6 +490,21 @@ namespace Persistence.Data.Migrations
                     b.HasOne("Persistence.Entities.Coin", "Coin")
                         .WithMany()
                         .HasForeignKey("CoinId");
+
+                    b.HasOne("Persistence.Entities.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineId");
+
+                    b.HasOne("Persistence.Entities.Payment", null)
+                        .WithMany("MachineCoins")
+                        .HasForeignKey("PaymentId");
+                });
+
+            modelBuilder.Entity("Persistence.Entities.Payment", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
+                        .WithMany()
+                        .HasForeignKey("IdentityUserId");
 
                     b.HasOne("Persistence.Entities.Machine", "Machine")
                         .WithMany()

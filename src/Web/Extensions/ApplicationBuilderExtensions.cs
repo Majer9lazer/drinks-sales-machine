@@ -6,7 +6,6 @@ using System;
 using System.Threading;
 using Microsoft.AspNetCore.Identity;
 using Persistence.Data;
-using Web.Utils;
 
 namespace Web.Extensions
 {
@@ -25,7 +24,6 @@ namespace Web.Extensions
                 context.Database.Migrate();
                 logger.LogInformation($"Migration of {applicationDbContextName} successfully applied.");
                 logger.LogInformation("Seeding data...");
-                ApplicationDbSeeder.SeedDatabase(context);
                 logger.LogInformation("Seeding data was successfully finished!");
             }
             catch (Exception e)
