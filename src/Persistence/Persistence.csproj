@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200314190320_AddImageIdNavigationPropertyToDrink.cs" />
+    <Compile Remove="Migrations\20200314190320_AddImageIdNavigationPropertyToDrink.Designer.cs" />
+    <Compile Remove="Migrations\20200314235332_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200314235332_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20200315003022_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200315003022_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20200315003143_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200315003143_InitialCreate.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />

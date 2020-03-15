@@ -23,7 +23,7 @@ namespace Web.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Drink>>> GetDrinks()
         {
-            return await _context.Drinks.ToListAsync();
+            return await _context.Drinks.AsNoTracking().Include(i => i.Image).ToListAsync();
         }
 
         // GET: api/Drinks/5

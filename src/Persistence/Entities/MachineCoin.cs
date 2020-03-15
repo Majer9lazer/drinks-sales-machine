@@ -7,8 +7,12 @@ namespace Persistence.Entities
     public class MachineCoin
     {
         public int Id { get; set; }
-        public Coin Coin { get; set; }
-        public Machine Machine { get; set; }
+
+        public int CoinId { get; set; }
+        public virtual Coin Coin { get; set; }
+
+        public int MachineId { get; set; }
+        public virtual Machine Machine { get; set; }
 
         /// <summary>
         /// Состояние <example>0(заблокирована),1(разблокирована)</example>

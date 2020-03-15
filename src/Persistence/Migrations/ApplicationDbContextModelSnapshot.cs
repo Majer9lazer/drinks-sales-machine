@@ -229,9 +229,6 @@ namespace Persistence.Migrations
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MachineId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(150)")
                         .HasMaxLength(150);
@@ -243,8 +240,6 @@ namespace Persistence.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.HasIndex("MachineId");
-
                     b.ToTable("Coins");
 
                     b.HasData(
@@ -252,28 +247,28 @@ namespace Persistence.Migrations
                         {
                             Id = 1,
                             ImageId = 1,
-                            Name = "1.руб",
+                            Name = "1. руб",
                             Value = 1
                         },
                         new
                         {
                             Id = 2,
                             ImageId = 1,
-                            Name = "2.руб",
+                            Name = "2. руб",
                             Value = 2
                         },
                         new
                         {
                             Id = 3,
                             ImageId = 1,
-                            Name = "5.руб",
+                            Name = "5. руб",
                             Value = 5
                         },
                         new
                         {
                             Id = 4,
                             ImageId = 1,
-                            Name = "10.руб",
+                            Name = "10. руб",
                             Value = 10
                         });
                 });
@@ -285,10 +280,7 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MachineId")
+                    b.Property<int>("ImageId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -301,26 +293,27 @@ namespace Persistence.Migrations
 
                     b.HasIndex("ImageId");
 
-                    b.HasIndex("MachineId");
-
                     b.ToTable("Drinks");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
+                            ImageId = 2,
                             Name = "Coca Cola",
                             Price = 35.0
                         },
                         new
                         {
                             Id = 2,
+                            ImageId = 4,
                             Name = "Fanta",
                             Price = 40.0
                         },
                         new
                         {
                             Id = 3,
+                            ImageId = 3,
                             Name = "Pepsi",
                             Price = 70.0
                         });
@@ -350,6 +343,16 @@ namespace Persistence.Migrations
                         {
                             Id = 2,
                             Path = "/img/cola.png"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Path = "/img/pepsi.png"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Path = "/img/fanta.png"
                         });
                 });
 
@@ -376,13 +379,13 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CoinId")
+                    b.Property<int>("CoinId")
                         .HasColumnType("int");
 
                     b.Property<byte>("CoinState")
                         .HasColumnType("tinyint");
 
-                    b.Property<int?>("MachineId")
+                    b.Property<int>("MachineId")
                         .HasColumnType("int");
 
                     b.Property<long?>("PaymentId")
@@ -399,6 +402,31 @@ namespace Persistence.Migrations
                     b.ToTable("MachineCoins");
                 });
 
+            modelBuilder.Entity("Persistence.Entities.MachineDrink", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("DrinkId")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("DrinkState")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int>("MachineId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DrinkId");
+
+                    b.HasIndex("MachineId");
+
+                    b.ToTable("MachineDrinks");
+                });
+
             modelBuilder.Entity("Persistence.Entities.Payment", b =>
                 {
                     b.Property<long>("PaymentId")
@@ -406,8 +434,14 @@ namespace Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("AdditionUserInfoInJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("IdentityUserId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<long?>("MachineDrinkId")
+                        .HasColumnType("bigint");
 
                     b.Property<int?>("MachineId")
                         .HasColumnType("int");
@@ -415,9 +449,17 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("PaymentDateUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<byte>("PaymentStatus")
+                        .HasColumnType("tinyint");
+
+                    b.Property<double>("ShortChange")
+                        .HasColumnType("float");
+
                     b.HasKey("PaymentId");
 
                     b.HasIndex("IdentityUserId");
+
+                    b.HasIndex("MachineDrinkId");
 
                     b.HasIndex("MachineId");
 
@@ -482,36 +524,49 @@ namespace Persistence.Migrations
                         .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Persistence.Entities.Machine", null)
-                        .WithMany("Coins")
-                        .HasForeignKey("MachineId");
                 });
 
             modelBuilder.Entity("Persistence.Entities.Drink", b =>
                 {
                     b.HasOne("Persistence.Entities.Image", "Image")
                         .WithMany()
-                        .HasForeignKey("ImageId");
-
-                    b.HasOne("Persistence.Entities.Machine", null)
-                        .WithMany("Drinks")
-                        .HasForeignKey("MachineId");
+                        .HasForeignKey("ImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Persistence.Entities.MachineCoin", b =>
                 {
                     b.HasOne("Persistence.Entities.Coin", "Coin")
                         .WithMany()
-                        .HasForeignKey("CoinId");
+                        .HasForeignKey("CoinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Persistence.Entities.Machine", "Machine")
-                        .WithMany()
-                        .HasForeignKey("MachineId");
+                        .WithMany("Coins")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Persistence.Entities.Payment", null)
                         .WithMany("MachineCoins")
                         .HasForeignKey("PaymentId");
+                });
+
+            modelBuilder.Entity("Persistence.Entities.MachineDrink", b =>
+                {
+                    b.HasOne("Persistence.Entities.Drink", "Drink")
+                        .WithMany()
+                        .HasForeignKey("DrinkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Persistence.Entities.Machine", "Machine")
+                        .WithMany("Drinks")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Persistence.Entities.Payment", b =>
@@ -519,6 +574,10 @@ namespace Persistence.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "IdentityUser")
                         .WithMany()
                         .HasForeignKey("IdentityUserId");
+
+                    b.HasOne("Persistence.Entities.MachineDrink", "MachineDrink")
+                        .WithMany()
+                        .HasForeignKey("MachineDrinkId");
 
                     b.HasOne("Persistence.Entities.Machine", "Machine")
                         .WithMany()

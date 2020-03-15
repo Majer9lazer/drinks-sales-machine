@@ -23,7 +23,22 @@ namespace Web.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Machine>>> GetMachines()
         {
-            return await _context.Machines.ToListAsync();
+            return await
+                _context.Machines.AsNoTracking()
+                    .Include(d => d.Coins)
+                        .ThenInclude(c => c.Coin)
+                        .ThenInclude(i => i.Image)
+                    .Include(d => d.Drinks)
+                        .ThenInclude(d => d.Drink)
+                        .ThenInclude(d => d.Image)
+                    .ToListAsync();
+        }
+
+        // GET: api/Machines/Coins(5)
+        [HttpGet("Coins({id})")]
+        public async Task<ActionResult<IEnumerable<MachineCoin>>> GetMachineCoinsByMachineId(int id)
+        {
+            return await _context.MachineCoins.AsNoTracking().Where(w => w.Machine.Id == id).ToListAsync();
         }
 
         // GET: api/Machines/5

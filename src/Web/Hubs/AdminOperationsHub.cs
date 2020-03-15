@@ -13,14 +13,15 @@ namespace Web.Hubs
     public interface IAdminOperationsClient
     {
         Task BlockMachineCoin(MachineCoin machineCoin);
+        Task DeleteCoin(Coin coin);
+        Task EditCoin(Coin coin);
+        Task AddCoin(Coin coin);
     }
     public class AdminOperationsHub : Hub<IAdminOperationsClient>
     {
-        private readonly ApplicationDbContext _db;
         private readonly IMachineService _machineService;
-        public AdminOperationsHub(ApplicationDbContext db, IMachineService machineService)
+        public AdminOperationsHub(IMachineService machineService)
         {
-            _db = db;
             _machineService = machineService;
         }
 
@@ -31,7 +32,19 @@ namespace Web.Hubs
             await Clients.All.BlockMachineCoin(coinToBeBlocked);
         }
 
+        public async Task OnDeleteCoin(Coin coin)
+        {
+            await Clients.Others.DeleteCoin(coin);
+        }
 
+        public async Task OnEditCoin(Coin coin)
+        {
+            await Clients.Caller.EditCoin(coin);
+        }
+        public async Task OnAddCoin(Coin coin)
+        {
+            await Clients.Caller.AddCoin(coin);
+        }
 
     }
 }

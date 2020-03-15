@@ -10,7 +10,7 @@
     <h4>Images</h4>
     <hr />
     <div v-for="image in images">
-        <img :src="image.path" :data-id="image.id"/>
+        <img :src="image.path" width="128" height="128" :data-id="image.id" class="img-thumbnail"/>
     </div>
 </div>
 @section Scripts

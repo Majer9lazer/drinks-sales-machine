@@ -4,7 +4,10 @@ using Persistence.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.UI.V3.Pages.Internal.Account.Manage;
+using Microsoft.AspNetCore.SignalR;
 using Persistence.Data;
+using Web.Hubs;
 
 namespace Web.Controllers.Api
 {
@@ -13,17 +16,18 @@ namespace Web.Controllers.Api
     public class CoinsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-        public CoinsController(ApplicationDbContext context)
+        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminOperationsHub;
+        public CoinsController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminOperationsHub)
         {
             _context = context;
+            _adminOperationsHub = adminOperationsHub;
         }
 
         // GET: api/Coins
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Coin>>> GetCoins()
         {
-            return await _context.Coins.ToListAsync();
+            return await _context.Coins.AsNoTracking().Include(i => i.Image).ToListAsync();
         }
 
         // GET: api/Coins/5
@@ -85,8 +89,8 @@ namespace Web.Controllers.Api
         }
 
         // DELETE: api/Coins/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Coin>> DeleteCoin(int id)
+        [HttpDelete("{id}/{connectionId}")]
+        public async Task<ActionResult<Coin>> DeleteCoin(int id,string connectionId)
         {
             var coin = await _context.Coins.FindAsync(id);
             if (coin == null)
@@ -94,8 +98,9 @@ namespace Web.Controllers.Api
                 return NotFound();
             }
 
-            _context.Coins.Remove(coin);
-            await _context.SaveChangesAsync();
+            await _adminOperationsHub.Clients.AllExcept(connectionId).DeleteCoin(coin);
+            //_context.Coins.Remove(coin);
+            //await _context.SaveChangesAsync();
 
             return coin;
         }

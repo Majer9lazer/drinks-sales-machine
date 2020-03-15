@@ -30,7 +30,6 @@ namespace Services
             var paymentModel = new Payment
             {
                 Machine = machine,
-                IdentityUser = user,
                 PaymentDateUtc = DateTime.Now,
                 MachineCoins = coins.ToList()
             };
@@ -47,7 +46,6 @@ namespace Services
             var paymentModel = new Payment
             {
                 Machine = machine,
-                IdentityUser = user,
                 PaymentDateUtc = DateTime.Now,
                 MachineCoins = coins.ToList()
             };

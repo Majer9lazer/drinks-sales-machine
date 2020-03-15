@@ -16,13 +16,25 @@ namespace Persistence.Entities
         /// </summary>
         public long PaymentId { get; set; }
 
-        public IdentityUser IdentityUser { get; set; }
+        public virtual IdentityUser IdentityUser { get; set; }
+        public string AdditionUserInfoInJson { get; set; }
+        public virtual MachineDrink MachineDrink { get; set; }
+        public virtual Machine Machine { get; set; }
 
-        public Machine Machine { get; set; }
-
-        public ICollection<MachineCoin> MachineCoins { get; set; }
+        /// <summary>
+        /// Сдача. Статус платежа = 4 <see cref="PaymentStatus"/>
+        /// </summary>
+        public double ShortChange { get; set; }
+        public virtual ICollection<MachineCoin> MachineCoins { get; set; }
 
         public DateTime PaymentDateUtc { get; set; }
+
+
+        /// <summary>
+        /// Состояние платежа;
+        /// <example>0 - не оплачен, 1 - оплачен, 2 - недостаточно средств, 3 - отменен, 4 - оплачен успешно со сдачей</example>
+        /// </summary>
+        public byte PaymentStatus { get; set; }
 
     }
 }
