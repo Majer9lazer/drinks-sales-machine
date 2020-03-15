@@ -59,21 +59,25 @@ namespace Services
                 }).ToList();
 
                 machine.Drinks = machineDrinks;
-                
+
                 var machineCoins = model.CoinIds.Select(s => new MachineCoin()
                 {
                     CoinId = s
                 }).ToList();
                 machine.Coins = machineCoins;
 
-                await _db.Machines.AddAsync(machine,cancellationToken);
+                await _db.Machines.AddAsync(machine, cancellationToken);
                 await _db.SaveChangesAsync(cancellationToken);
 
                 await tran.CommitAsync(cancellationToken);
 
                 return machine;
             }
-
+            catch (TaskCanceledException e)
+            {
+                _logger.LogWarning(e, "Machine Add Operation was cancelled.");
+                return default;
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while creating machine");

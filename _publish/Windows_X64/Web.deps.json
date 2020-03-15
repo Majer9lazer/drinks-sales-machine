@@ -3186,6 +3186,11 @@
         }
       },
       "Persistence/1.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "3.1.2",
+          "Microsoft.EntityFrameworkCore.SqlServer": "3.1.2",
+          "Microsoft.EntityFrameworkCore.Tools": "3.1.2"
+        },
         "compile": {
           "Persistence.dll": {}
         }
@@ -6346,6 +6351,11 @@
         }
       },
       "Persistence/1.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "3.1.2",
+          "Microsoft.EntityFrameworkCore.SqlServer": "3.1.2",
+          "Microsoft.EntityFrameworkCore.Tools": "3.1.2"
+        },
         "runtime": {
           "Persistence.dll": {}
         }
