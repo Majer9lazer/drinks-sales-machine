@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using Persistence.Data;
 using Persistence.Entities;
 using Services;
@@ -16,6 +18,7 @@ namespace Web.Hubs
         Task DeleteCoin(Coin coin);
         Task EditCoin(Coin coin);
         Task AddCoin(Coin coin);
+        Task DeleteMachine(Machine machine);
     }
     public class AdminOperationsHub : Hub<IAdminOperationsClient>
     {
@@ -46,5 +49,10 @@ namespace Web.Hubs
             await Clients.Caller.AddCoin(coin);
         }
 
+        public async Task OnDeleteMachine(Machine machine)
+        {
+            var deletedMachine = await _machineService.DeleteMachine(machine, this.Context.ConnectionAborted);
+            await Clients.Others.DeleteMachine(deletedMachine);
+        }
     }
 }

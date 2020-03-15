@@ -3,15 +3,10 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Добро пожаловать!</h1>
+    <p>Хорошо, что вы с нами! Мы рады предоставить вам возможность покупки напитков в наших автоматах!</p>
 </div>
 <div class="container-fluid" id="mainBlock">
-    <h4>Images</h4>
-    <hr />
-    <div v-for="image in images">
-        <img :src="image.path" width="128" height="128" :data-id="image.id" class="img-thumbnail"/>
-    </div>
 </div>
 @section Scripts
 {
@@ -22,9 +17,6 @@
                 images: []
             },
             created: async function () {
-                var imagesResponse = await window.axios.get('/api/images');
-                console.log(imagesResponse);
-                this.images = imagesResponse.data;
 
             }
         });

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using Newtonsoft.Json;
 using Persistence.Data;
 using Web.Extensions;
 using Web.Hubs;
@@ -42,7 +43,7 @@ namespace Web
             });
 
             services.AddApplicationServices();
-            
+
             services.AddDefaultIdentity<IdentityUser>(options =>
                 {
                     options.Password.RequireDigit = true;
@@ -54,7 +55,9 @@ namespace Web
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllersWithViews();
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
             services.AddRazorPages();
             services.AddSignalR();
         }

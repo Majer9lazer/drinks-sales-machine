@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace Services
     {
         Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState);
         Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default);
+        Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default);
     }
     public class MachineService : IMachineService
     {
@@ -40,6 +42,14 @@ namespace Services
             return coinToBeUpdated;
         }
 
+        public async Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            _db.Machines.Remove(machine);
+            await _db.SaveChangesAsync(cancellationToken);
+            return machine;
+        }
+
         public async Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -47,27 +57,47 @@ namespace Services
 
             try
             {
-                var machine = new Machine()
+                var machine = new Machine
                 {
-                    Name = model.MachineName,
+                    Name = model.MachineName
                 };
 
-                var machineDrinks = model.DrinkIds.Select(s => new MachineDrink()
+                var machineDrinks = new List<MachineDrink>(model.DrinkIds.Sum(s => s.Quantity));
+
+                foreach (var drinkViewModel in model.DrinkIds)
                 {
-                    DrinkId = s.DrinkId,
-                    DrinkState = 0,
-                }).ToList();
+                    for (int i = 0; i < drinkViewModel.Quantity; i++)
+                    {
+                        machineDrinks.Add(new MachineDrink()
+                        {
+                            DrinkId = drinkViewModel.DrinkId,
+                            DrinkState = 0
+                        });
+                    }
+                }
 
                 machine.Drinks = machineDrinks;
 
-                var machineCoins = model.CoinIds.Select(s => new MachineCoin()
+                var machineCoins = new List<MachineCoin>(model.CoinIds.Sum(s => s.Quantity));
+
+                foreach (var coinViewModel in model.CoinIds)
                 {
-                    CoinId = s
-                }).ToList();
+                    for (int i = 0; i < coinViewModel.Quantity; i++)
+                    {
+                        machineCoins.Add(new MachineCoin()
+                        {
+                            CoinId = coinViewModel.CoinId,
+                            CoinState = 0
+                        });
+                    }
+                }
+
                 machine.Coins = machineCoins;
 
                 await _db.Machines.AddAsync(machine, cancellationToken);
-                await _db.SaveChangesAsync(cancellationToken);
+                var savedCount = await _db.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("saved elements count in Machine entity = {count}", savedCount);
 
                 await tran.CommitAsync(cancellationToken);
 

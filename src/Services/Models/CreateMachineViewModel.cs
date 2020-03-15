@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Persistence.Entities;
 
 namespace Services.Models
@@ -8,8 +9,10 @@ namespace Services.Models
     {
         public string MachineName { get; set; }
 
+        [MinLength(1)]
         public IEnumerable<CreateMachineDrinkViewModel> DrinkIds { get; set; }
 
-        public IEnumerable<int> CoinIds { get; set; }
+        [MinLength(1)]
+        public IEnumerable<CreateMachineCoinViewModel> CoinIds { get; set; }
     }
 }

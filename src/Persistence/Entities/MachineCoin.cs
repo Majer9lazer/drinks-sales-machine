@@ -15,7 +15,7 @@ namespace Persistence.Entities
         public virtual Machine Machine { get; set; }
 
         /// <summary>
-        /// Состояние <example>0(заблокирована),1(разблокирована)</example>
+        /// Состояние <example>0(разблокирована),1(заблокирована)</example>
         /// </summary>
         public byte CoinState { get; set; }
     }

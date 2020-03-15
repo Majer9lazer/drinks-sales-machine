@@ -13,7 +13,7 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Path" class="control-label"></label>
+                <label asp-for="Path" class="col-form-label"></label>
                 <input asp-for="Path" class="form-control" />
                 <span asp-validation-for="Path" class="text-danger"></span>
             </div>
@@ -25,6 +25,6 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" asp-controller="Admin">Back to List</a>
 </div>
 

@@ -25,12 +25,9 @@ namespace Web.Controllers.Api
         {
             return await
                 _context.Machines.AsNoTracking()
+                    .Where(w => w.Drinks.All(s => s.DrinkState == 0) && w.Coins.All(c => c.CoinState == 0))
                     .Include(d => d.Coins)
-                        .ThenInclude(c => c.Coin)
-                        .ThenInclude(i => i.Image)
                     .Include(d => d.Drinks)
-                        .ThenInclude(d => d.Drink)
-                        .ThenInclude(d => d.Image)
                     .ToListAsync();
         }
 

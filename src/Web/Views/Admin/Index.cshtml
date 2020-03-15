@@ -14,25 +14,36 @@
                 </h2>
             </div>
 
-            <div id="machineListBlock" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+            <div id="machineListBlock" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
                 <div class="card-body">
                     <table id="machineList" class="table table-hover table-sm table-active">
                         <thead class="thead-dark">
                             <tr>
                                 <th>Number</th>
                                 <th>Name</th>
-                                <th>Machine Coins</th>
+                                <th>Optional Info</th>
+                                <th>Operations</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="machine in machines">
                                 <td>{{machine.id}}</td>
-                                <td>{{machine.name}}</td>
                                 <td>
-                                    <table class="table table-sm table-active">
-                                        <thead>
-                                        </thead>
-                                    </table>
+                                    {{machine.name}}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary">
+                                        Coins <span class="badge badge-light">{{machine.coins.length}}</span>
+                                    </button>
+                                    <button type="button" class="btn btn-dark">
+                                        Drinks <span class="badge badge-light">{{machine.drinks.length}}</span>
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="float-right" role="group" aria-label="Coins operations buttons">
+                                        <a :href="`@Url.Action("Edit","Machines")/${machine.id}`" class="btn btn-primary">Edit</a>
+                                        <button type="button" class="btn btn-danger" @@click="deleteMachine(machine)">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -49,7 +60,7 @@
                     <a href="@Url.Action("Create","Coins")" class="btn btn-primary">+</a>
                 </h2>
             </div>
-            <div id="coinListBlock" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordionExample">
+            <div id="coinListBlock" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
                 <div class="card-body ">
                     <table class="table table-bordered table-hover table-sm mx-auto" style="width:80%">
                         <thead class="thead-dark">
@@ -88,7 +99,7 @@
                     <a href="@Url.Action("Create","Drinks")" class="btn btn-primary">+</a>
                 </h2>
             </div>
-            <div id="drinkListBlock" class="collapse show" aria-labelledby="headingThree" data-parent="#accordionExample">
+            <div id="drinkListBlock" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
                 <div class="card-body">
                     <table class="table table-bordered table-hover table-sm">
                         <thead class="thead-dark">
@@ -104,7 +115,7 @@
                                 <td class="text-center align-middle" style="width: 7rem">
                                     <p class="h5">{{drink.name}}</p>
                                 </td>
-                                <td  class="text-center align-middle"><p class="h4">{{drink.price}}</p></td>
+                                <td class="text-center align-middle"><p class="h4">{{drink.price}}</p></td>
                                 <td class="text-center" style="width: 7rem">
                                     <img :src="drink.image.path" class="align-content-center" width="64" height="64" :alt="drink.name">
                                 </td>
@@ -138,35 +149,42 @@
                 drinks: []
             },
 
-            created: async function() {
+            created: async function () {
                 this.machines = await this.getMachines();
                 this.coins = await this.getCoins();
                 this.drinks = await this.getDrinks();
             },
             methods: {
-                getMachines: async function() {
+                getMachines: async function () {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                getCoins: async function() {
+                deleteMachine: function(machine) {
+                    adminOperationsConnection.invoke('OnDeleteMachine', machine);
+                    this.machines.splice(this.machines.indexOf(machine), 1);
+                },
+                onDeleteMachine: function(machine) {
+                    this.machines.splice(this.machines.indexOf(machine), 1);
+                },
+                getCoins: async function () {
                     return (await window.axios.get('/api/Coins')).data;
                 },
-                getDrinks: async function() {
+                getDrinks: async function () {
                     return (await window.axios.get('/api/Drinks')).data;
                 },
 
-                deleteCoinWithoutIndex: function(coin) {
+                deleteCoinWithoutIndex: function (coin) {
                     const index = this.coins.indexOf(coin);
                     return this.coins.splice(index, 1);
                 },
-                deleteCoin: async function(coin) {
+                deleteCoin: async function (coin) {
                     const coinDeleteResult =
                         await window.axios.delete(`/api/Coins/${coin.id}/${adminOperationsConnection.connectionId}`);
                     return this.deleteCoinWithoutIndex(coinDeleteResult);
                 },
-                addCoin: function(coin) {
+                addCoin: function (coin) {
                     this.coins.push(coin);
                 },
-                editCoin: function(coin) {
+                editCoin: function (coin) {
                     const oldCoin = this.coins.find(f => f.id === coin.id);
 
                     if (oldCoin !== undefined) {
@@ -186,11 +204,12 @@
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        adminOperationsConnection.start().then(function() {
+        adminOperationsConnection.start().then(function () {
             console.log(`connected from admin panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
         });
         adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.deleteCoinWithoutIndex(coin));
         adminOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.addCoin(coin));
         adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
+        adminOperationsConnection.on('DeleteMachine', (machine) => administrationBlockVue.onDeleteMachine(machine));
     </script>
 }

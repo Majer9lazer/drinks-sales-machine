@@ -13,21 +13,21 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+                <label asp-for="Name" class="col-form-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Value" class="control-label"></label>
+                <label asp-for="Value" class="col-form-label"></label>
                 <input asp-for="Value" class="form-control" />
                 <span asp-validation-for="Value" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label class="control-label">Path</label>
+                <label class="col-form-label">Path</label>
                 <select asp-for="Image.Id" class="form-control" v-on:change="imageSelectChange($event)" asp-items="ViewBag.ImageId"></select>
             </div>
             <div class="form-group">
-                <label asp-for="Image" class="control-label"></label>
+                <label asp-for="Image" class="col-form-label"></label>
                 <img class="img-thumbnail" :src="selectedImagePath">
                 <span asp-validation-for="Image.Path" class="text-danger"></span>
             </div>

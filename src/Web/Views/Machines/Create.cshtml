@@ -13,32 +13,41 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="MachineName" class="control-label"></label>
-                <input asp-for="MachineName" value="Test_@DateTime.Now.ToString("MM_dd_yyyy_hh:mm:ss")" class="form-control" />
+                <label asp-for="MachineName" class="col-form-label"></label>
+                <input asp-for="MachineName" value="Автомат_напитков_@DateTime.Now.ToString("MM_dd_yyyy_HH:mm:ss")" class="form-control" />
                 <span asp-validation-for="MachineName" class="text-danger"></span>
             </div>
-            <div class="form-group" v-for="(addedDrink,index) in addedDrinks">
-                <label class="control-label">Machine Drinks[{{index}}]</label>
+            <div class="form-group" v-for="(addedDrink,index) in newAddedDrinks">
+                <label class="col-form-label">Machine Drink <span class="font-weight-bold">#{{index+1}}</span></label>
                 <div class="input-group">
-                    <select class="form-control" v-model="addedDrink.selected" :name="'DrinkIds['+index+'].DrinkId'">
+                    <select class="form-control" v-model="addedDrink.selectedDrinkId" :name="'DrinkIds['+index+'].DrinkId'">
                         <option v-for="drink in addedDrink.drinks" v-bind:value="drink.id">{{drink.name}}</option>
                     </select>
                     <input class="form-control col-sm-2" type="number" v-model="addedDrink.quantity" :name="'DrinkIds['+index+'].Quantity'" />
                     <div class="input-group-append">
-                        <button class="btn btn-outline-success" v-bind:disabled="addedDrink.selected === '' || addedDrink.drinks.length <= 1"
-                                type="button" v-on:click="addNewDrink(addedDrink.selected,index)">
+                        <button class="btn btn-outline-success" v-bind:disabled="addedDrink.selectedDrinkId === '' || addedDrink.drinks.length <= 1"
+                                type="button" v-on:click="addNewDrink(addedDrink.selectedDrinkId,index)">
                             +
                         </button>
                     </div>
-
                 </div>
-
             </div>
-            <div class="form-group">
-                <label class="control-label">Machine Coins</label>
-                <select id="CoinIds" name="CoinIds[]" class="form-control">
-                    <option v-for="coin in coins" v-bind:value="coin.id">{{coin.name}}</option>
-                </select>
+            <hr style="height: 0.99px; background-color: #4b4747" />
+            <div class="form-group" v-for="(addedCoin,index) in newAddedCoins">
+                <label class="col-form-label">Machine Coin <span class="font-weight-bold">#{{index+1}}</span></label>
+                <div class="input-group">
+                    <select class="form-control" v-model="addedCoin.selectedCoinId" :name="'CoinIds['+index+'].CoinId'">
+                        <option v-for="coin in addedCoin.coins" v-bind:value="coin.id">{{coin.name}}</option>
+                    </select>
+                    <input class="form-control col-sm-2" type="number" v-model="addedCoin.quantity" :name="'CoinIds['+index+'].Quantity'" />
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-success"
+                                v-bind:disabled="addedCoin.selectedCoinId === '' || addedCoin.coins.length <= 1"
+                                type="button" v-on:click="addNewCoin(addedCoin.selectedCoinId,index)">
+                            +
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -57,16 +66,15 @@
         var createMachineBlockVue = new Vue({
             el: '#createMachineBlock',
             data: {
-                drinks: [],
-                coins: [],
-                selectedDrinks: [],
-                selectedCoins: [],
-                addedDrinks: []
+                newAddedDrinks: [],
+                newAddedCoins: []
             },
             created: async function () {
-                this.drinks = await this.getDrinks();
-                this.addedDrinks.push({ selected: '', drinks: this.drinks, quantity: 1 });
-                this.coins = await this.getCoins();
+                const drinks = await this.getDrinks();
+                const coins = await this.getCoins();
+
+                this.newAddedDrinks.push({ selectedDrinkId: '', drinks: drinks, quantity: 1 });
+                this.newAddedCoins.push({ selectedCoinId: '', coins: coins, quantity: 1 });
             },
 
             methods: {
@@ -79,18 +87,34 @@
 
                 addNewDrink: function (selectedDrinkId, index) {
 
-                    var currentAddedDrink = this.addedDrinks[index];
+                    const currentAddedDrink = this.newAddedDrinks[index];
 
-                    var selectedDrink = currentAddedDrink.drinks.find(f => f.id === selectedDrinkId);
+                    const selectedDrink = currentAddedDrink.drinks.find(f => f.id === selectedDrinkId);
 
                     // берем новые напитки которые еще не выбрали
-                    var newDrinks = currentAddedDrink.drinks.filter(f => f.id !== selectedDrinkId);
+                    const notSelectedDrinks = currentAddedDrink.drinks.filter(f => f.id !== selectedDrinkId);
 
                     // удаляем все напитки кроме того, который выбрали, чтобы нельзя было пользователю перевыбрать. Защита от дурака.
                     currentAddedDrink.drinks.splice(0, currentAddedDrink.drinks.length, selectedDrink);
 
                     // добавляем новый элемент для выбора напитков
-                    this.addedDrinks.push({ selected: '', drinks: newDrinks, quantity: 1 });
+                    this.newAddedDrinks.push({ selectedDrinkId: '', drinks: notSelectedDrinks, quantity: 1 });
+                },
+
+                addNewCoin: function (selectedCoinId, index) {
+
+                    const currentAddedCoin = this.newAddedCoins[index];
+
+                    const selectedCoin = currentAddedCoin.coins.find(f => f.id === selectedCoinId);
+
+                    // берем новые напитки которые еще не выбрали
+                    const notSelectedCoins = currentAddedCoin.coins.filter(f => f.id !== selectedCoinId);
+
+                    // удаляем все напитки кроме того, который выбрали, чтобы нельзя было пользователю перевыбрать. Защита от дурака.
+                    currentAddedCoin.coins.splice(0, currentAddedCoin.coins.length, selectedCoin);
+
+                    // добавляем новый элемент для выбора напитков
+                    this.newAddedCoins.push({ selectedCoinId: '', coins: notSelectedCoins, quantity: 1 });
                 }
             }
         });
