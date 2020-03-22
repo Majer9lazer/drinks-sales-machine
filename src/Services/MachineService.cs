@@ -15,7 +15,7 @@ namespace Services
 {
     public interface IMachineService
     {
-        Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState);
+        Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState, CancellationToken ct = default);
         Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default);
         Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default);
     }
@@ -29,14 +29,16 @@ namespace Services
             _logger = logger;
         }
 
-        public async Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState)
+        public async Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState, CancellationToken ct = default)
         {
-            var coinToBeUpdated = await _db.MachineCoins.SingleAsync(f => f.Coin.Id == coinId && f.Machine.Id == machineId);
+            ct.ThrowIfCancellationRequested();
+            var coinToBeUpdated = await _db.MachineCoins.SingleAsync(f => f.Coin.Id == coinId && f.Machine.Id == machineId, ct);
+
             if (coinToBeUpdated != null)
             {
                 coinToBeUpdated.CoinState = coinState;
                 _db.MachineCoins.Update(coinToBeUpdated);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync(ct);
             }
 
             return coinToBeUpdated;
@@ -50,10 +52,10 @@ namespace Services
             return machine;
         }
 
-        public async Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default)
+        public async Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken сt = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            await using var tran = await _db.Database.BeginTransactionAsync(cancellationToken);
+            сt.ThrowIfCancellationRequested();
+            await using var tran = await _db.Database.BeginTransactionAsync(сt);
 
             try
             {
@@ -94,12 +96,12 @@ namespace Services
 
                 machine.Coins = machineCoins;
 
-                await _db.Machines.AddAsync(machine, cancellationToken);
-                var savedCount = await _db.SaveChangesAsync(cancellationToken);
+                await _db.Machines.AddAsync(machine, сt);
+                var savedCount = await _db.SaveChangesAsync(сt);
 
                 _logger.LogInformation("saved elements count in Machine entity = {count}", savedCount);
 
-                await tran.CommitAsync(cancellationToken);
+                await tran.CommitAsync(сt);
 
                 return machine;
             }
@@ -111,7 +113,7 @@ namespace Services
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while creating machine");
-                await tran.RollbackAsync(cancellationToken);
+                await tran.RollbackAsync(сt);
                 throw;
             }
         }
