@@ -1,0 +1,57 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+    Layout = "_IdentityLayout";
+}
+
+@section Styles
+{
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @@media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/floating-labels.css" />
+}
+<form class="form-signin" method="post">
+    <div class="text-center mb-4">
+        <img class="mb-4" src="~/img/machine.png" alt="" width="250" height="200">
+        <h1 class="h3 mb-3 font-weight-normal">Здравствуйте!</h1>
+    </div>
+
+    <div class="form-label-group">
+        <input type="email" asp-for="Input.Email" class="form-control" placeholder="Email address" required="" autofocus="">
+        <label asp-for="Input.Email">Email address</label>
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" asp-for="Input.Password" class="form-control" placeholder="Password" required="">
+        <label asp-for="Input.Password">Password</label>
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+
+    <div class="custom-control custom-checkbox mb-3">
+        <input type="checkbox" class="custom-control-input" id="remeber-me-checkbox" value="remember-me">
+        <label class="custom-control-label" for="remeber-me-checkbox">Запомнить меня</label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Войти</button>
+    <a href="@Url.Action("Index","Home")" class="btn btn-lg btn-outline-primary btn-block">К автомату</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
