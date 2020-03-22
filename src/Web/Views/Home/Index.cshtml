@@ -14,10 +14,19 @@
         var mainBlockVue = new Vue({
             el: '#mainBlock',
             data: {
+                machine: [],
                 images: []
             },
             created: async function () {
-
+                this.machine = await this.getMostAppropriateMachine();
+                //this.machine.images.filter((value, index, self)=>self.find(f=>f.))
+                //array.map(item => item.age)
+                //    .filter((value, index, self) => self.indexOf(value) === index)
+            },
+            methods: {
+                getMostAppropriateMachine: async function() {
+                    return (await window.axios.get('/api/Machines/MostAppropriate')).data;
+                }
             }
         });
     </script>

@@ -38,6 +38,26 @@ namespace Web.Controllers.Api
             return await _context.MachineCoins.AsNoTracking().Where(w => w.Machine.Id == id).ToListAsync();
         }
 
+        /// <summary>
+        /// Получить самый подходящий автомат для дальнейшей работы с ним.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("MostAppropriate")]
+        public async Task<ActionResult<Machine>> GetMostAppropriateMachine()
+        {
+            return await _context.Machines.AsNoTracking()
+                    .Where(w => w.Drinks.All(d => d.DrinkState == 0))
+                    .OrderByDescending(o => o.Drinks.Count)
+                        .ThenByDescending(o => o.Coins.Count)
+                    .Include(d => d.Drinks)
+                        .ThenInclude(d => d.Drink)
+                            .ThenInclude(i => i.Image)
+                    .Include(c => c.Coins)
+                        .ThenInclude(c => c.Coin)
+                        .ThenInclude(i => i.Image)
+                    .FirstOrDefaultAsync();
+        }
+
         // GET: api/Machines/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Machine>> GetMachine(int id)
