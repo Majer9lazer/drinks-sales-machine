@@ -30,7 +30,7 @@ namespace Persistence.Utils
         {
             return new[]
             {
-                new Image { Id = 1, Path = "/img/ruble.png" },
+                new Image {Id = 1, Path = "/img/ruble.png" },
                 new Image {Id = 2, Path = "/img/cola.png"},
                 new Image {Id = 3, Path = "/img/pepsi.png"},
                 new Image {Id = 4, Path = "/img/fanta.png"},

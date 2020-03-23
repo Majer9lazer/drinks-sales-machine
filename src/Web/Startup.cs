@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Newtonsoft.Json;
 using Persistence.Data;
+using Persistence.Entities;
 using Web.Extensions;
 using Web.Hubs;
 
@@ -44,7 +45,7 @@ namespace Web
 
             services.AddApplicationServices();
 
-            services.AddDefaultIdentity<IdentityUser>(options =>
+            services.AddDefaultIdentity<ApplicationUser>(options =>
                 {
                     options.Password.RequireDigit = true;
                     options.Password.RequiredUniqueChars = 0;

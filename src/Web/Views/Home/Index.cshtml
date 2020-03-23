@@ -82,13 +82,13 @@
 
 
             @*<form class="card p-2">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Promo code">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-secondary">Redeem</button>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Promo code">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-secondary">Redeem</button>
+                        </div>
                     </div>
-                </div>
-            </form>*@
+                </form>*@
         </div>
     </div>
 
@@ -100,21 +100,23 @@
             el: '#mainBlock',
             data: {
                 machine: {},
-                localCoinsInMachine: []
+                localCoinsInMachine: [],
+                currentUserName: '@(User?.Identity?.Name)'
             },
-            created: async function () {
+            created: async function() {
                 this.machine = await this.getMostAppropriateMachine();
                 this.machine.drinks = this.getUniqueDrinksWithCount(this.machine.drinks);
                 this.machine.coins = this.getUniqueCoinsWithCount(this.machine.coins);
                 this.localCoinsInMachine = this.getLocalCoinsInMachine();
+
             },
             computed: {
-                totalCoinsInMachine: function () {
+                totalCoinsInMachine: function() {
                     return this.localCoinsInMachine.reduce((total, coin) => total + coin.value, 0);
                 }
             },
             methods: {
-                getMostAppropriateMachine: async function () {
+                getMostAppropriateMachine: async function() {
                     return (await window.axios.get('/api/Machines/MostAppropriate')).data;
                 },
                 pushCoinIntoMachine(coin) {
@@ -130,7 +132,7 @@
                 },
                 getUniqueDrinksWithCount(drinks) {
                     return drinks
-                        .map(function (value, index, array) {
+                        .map(function(value, index, array) {
                             var drink = value.drink;
                             drink.count = array.reduce((total, x) => (x.drinkId === drink.id) ? total + 1 : total, 0);
                             return drink;
@@ -139,7 +141,7 @@
                 },
                 getUniqueCoinsWithCount(coins) {
                     return coins
-                        .map(function (value, index, array) {
+                        .map(function(value, index, array) {
                             var coin = value.coin;
                             coin.count = array.reduce((total, x) => (x.coinId === coin.id) ? total + 1 : total, 0);
                             return coin;

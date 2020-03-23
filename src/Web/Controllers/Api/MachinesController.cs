@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Persistence.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Persistence.Data;
+using Web.Hubs;
 
 namespace Web.Controllers.Api
 {
@@ -13,10 +16,11 @@ namespace Web.Controllers.Api
     public class MachinesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-        public MachinesController(ApplicationDbContext context)
+        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
+        public MachinesController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
         {
             _context = context;
+            _adminHub = adminHub;
         }
 
         // GET: api/Machines

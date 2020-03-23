@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
-using Persistence.Data;
+﻿using Microsoft.AspNetCore.SignalR;
 using Persistence.Entities;
 using Services;
+using System.Threading.Tasks;
 
 namespace Web.Hubs
 {
@@ -42,11 +35,11 @@ namespace Web.Hubs
 
         public async Task OnEditCoin(Coin coin)
         {
-            await Clients.Caller.EditCoin(coin);
+            await Clients.Others.EditCoin(coin);
         }
         public async Task OnAddCoin(Coin coin)
         {
-            await Clients.Caller.AddCoin(coin);
+            await Clients.Others.AddCoin(coin);
         }
 
         public async Task OnDeleteMachine(Machine machine)

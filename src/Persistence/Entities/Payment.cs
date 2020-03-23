@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
 
 namespace Persistence.Entities
 {
@@ -16,8 +13,8 @@ namespace Persistence.Entities
         /// </summary>
         public long PaymentId { get; set; }
 
-        public virtual IdentityUser IdentityUser { get; set; }
-        public string AdditionUserInfoInJson { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
+
         public virtual MachineDrink MachineDrink { get; set; }
         public virtual Machine Machine { get; set; }
 

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.AspNetCore.Identity;
 using Persistence.Data;
+using Persistence.Entities;
 
 namespace Web.Extensions
 {
@@ -40,12 +41,12 @@ namespace Web.Extensions
             var logger = app.ApplicationServices.GetRequiredService<ILogger<Startup>>();
             using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
 
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var user = userManager.FindByNameAsync(adminName).GetAwaiter().GetResult();
             if (user == null)
             {
-                var adminUser = new IdentityUser(adminName);
+                var adminUser = new ApplicationUser(adminName);
                 var createResult = userManager.CreateAsync(adminUser, adminPassword).GetAwaiter()
                     .GetResult();
 
