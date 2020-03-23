@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - Web</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    @RenderSection("Styles",false)
+    @RenderSection("Styles", false)
 </head>
 <body>
     <header>
@@ -36,9 +36,12 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="text-muted">
         <div class="container">
-            &copy; 2020 - Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <p>© DSMAS @DateTime.Now.Year</p>
+            <p><b>DSMAS</b> : Drink Sales Machine Automation System</p>
+            @* ReSharper disable once Html.PathError *@
+            <p><b>Author : </b><a href="mailto:sidorenkoegor1999@@mail.ru" >Sidorenko Egor</a></p>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

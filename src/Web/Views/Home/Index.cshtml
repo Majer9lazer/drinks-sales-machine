@@ -1,12 +1,97 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/album.css" />
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
 
-<div class="text-center">
-    <h1 class="display-4">Добро пожаловать!</h1>
-    <p>Хорошо, что вы с нами! Мы рады предоставить вам возможность покупки напитков в наших автоматах!</p>
-</div>
+        @@media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        .lh-condensed {
+            line-height: 1.25;
+        }
+    </style>
+}
+
 <div class="container-fluid" id="mainBlock">
+    <div class="row">
+        <div class="col-md-12 jumbotron">
+            <h1>Добро пожаловать!</h1>
+            <p class="lead">Рады приветствовать вас в нашей автоматизированной системе покупки напитков в автоматах!</p>
+            <p class="lead">
+                Так же вы можете
+                <a href="@Url.Action("Index", "Docs")" role="button">ознакомиться</a>
+                как работать с нашей системой и с её преимуществами.
+            </p>
+
+            <p class="h4">{{machine.name}}</p>
+
+        </div>
+    </div>
+    <div class="row py-4 bg-white">
+        <h3 class="d-flex justify-content-between align-items-center">
+            <span class="text-dark">Закинуто монет в автомат : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
+        </h3>
+
+    </div>
+    <div class="row py-4 bg-light">
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col-md-4" v-for="drink in machine.drinks">
+                    <div class="card mb-4 shadow-lg">
+                        <img class="bd-placeholder-img card-img-top py-sm-2" :src="drink.image.path" height="225"
+                             role="img" aria-label="Placeholder: Thumbnail">
+                        <div class="card-body">
+                            <h4 class="card-text">{{drink.name}} <span class="badge badge-primary">{{drink.count}}</span></h4>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-success">Купить</button>
+                                </div>
+                                <small class="text-muted">{{drink.price}}. руб</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-3 order-md-2">
+            <div class="row">
+                <div class="col-md-6 mb-1 pr-1 pl-1" v-for="coin in machine.coins">
+                    <div class="card text-dark text-center" title="Нажмите чтобы закинуть монету">
+                        <a href="javaScript:void(0);" @@click="pushCoinIntoMachine(coin)">
+                            <img :src="coin.image.path" :alt="coin.name" class="card-img-top p-sm-2">
+                        </a>
+                        <h5 class="card-title">{{coin.name}}</h5>
+                    </div>
+                </div>
+            </div>
+
+
+            @*<form class="card p-2">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Promo code">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-secondary">Redeem</button>
+                    </div>
+                </div>
+            </form>*@
+        </div>
+    </div>
+
 </div>
 @section Scripts
 {
@@ -14,18 +99,53 @@
         var mainBlockVue = new Vue({
             el: '#mainBlock',
             data: {
-                machine: [],
-                images: []
+                machine: {},
+                localCoinsInMachine: []
             },
             created: async function () {
                 this.machine = await this.getMostAppropriateMachine();
-                //this.machine.images.filter((value, index, self)=>self.find(f=>f.))
-                //array.map(item => item.age)
-                //    .filter((value, index, self) => self.indexOf(value) === index)
+                this.machine.drinks = this.getUniqueDrinksWithCount(this.machine.drinks);
+                this.machine.coins = this.getUniqueCoinsWithCount(this.machine.coins);
+                this.localCoinsInMachine = this.getLocalCoinsInMachine();
+            },
+            computed: {
+                totalCoinsInMachine: function () {
+                    return this.localCoinsInMachine.reduce((total, coin) => total + coin.value, 0);
+                }
             },
             methods: {
-                getMostAppropriateMachine: async function() {
+                getMostAppropriateMachine: async function () {
                     return (await window.axios.get('/api/Machines/MostAppropriate')).data;
+                },
+                pushCoinIntoMachine(coin) {
+                    this.localCoinsInMachine.push(coin);
+                    localStorage.setItem('localCoins', JSON.stringify(this.localCoinsInMachine));
+                },
+                getLocalCoinsInMachine() {
+                    const localCoins = localStorage.getItem('localCoins');
+                    if (localCoins !== undefined && localCoins !== null) {
+                        return JSON.parse(localCoins);
+                    }
+                    return [];
+                },
+                getUniqueDrinksWithCount(drinks) {
+                    return drinks
+                        .map(function (value, index, array) {
+                            var drink = value.drink;
+                            drink.count = array.reduce((total, x) => (x.drinkId === drink.id) ? total + 1 : total, 0);
+                            return drink;
+                        })
+                        .filter((value, index, self) => self.map(s => s.id).indexOf(value.id) === index);
+                },
+                getUniqueCoinsWithCount(coins) {
+                    return coins
+                        .map(function (value, index, array) {
+                            var coin = value.coin;
+                            coin.count = array.reduce((total, x) => (x.coinId === coin.id) ? total + 1 : total, 0);
+                            return coin;
+                        })
+                        .filter((value, index, self) => self.map(s => s.id).indexOf(value.id) === index)
+                        .sort((a, b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
                 }
             }
         });
