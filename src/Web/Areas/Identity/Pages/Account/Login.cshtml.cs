@@ -80,7 +80,10 @@ namespace Web.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    var user = await _userManager.FindByNameAsync(Input.Email);
+                    user.IpAddress = this.HttpContext.Connection.RemoteIpAddress.MapToIPv6().ToString();
+                    await _userManager.UpdateAsync(user);
+                    _logger.LogInformation("User logged in. with ip = {ip}",user.IpAddress);
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
