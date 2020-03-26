@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
 using Persistence.Entities;
+using Services;
 using Web.Hubs;
 
 namespace Web.Controllers.Api
@@ -18,12 +19,14 @@ namespace Web.Controllers.Api
     [ApiController]
     public class MachineCoinsController : ControllerBase
     {
+        private readonly IMachineCoinsService _machineCoinsService;
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
-        public MachineCoinsController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
+        public MachineCoinsController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub, IMachineCoinsService machineCoinsService)
         {
             _context = context;
             _adminHub = adminHub;
+            _machineCoinsService = machineCoinsService;
         }
 
         // GET: api/MachineCoins
@@ -83,6 +86,24 @@ namespace Web.Controllers.Api
             return NoContent();
         }
 
+        [HttpPut("Lock")]
+        public async Task<IActionResult> LockMachineCoins(MachineCoin coin, CancellationToken ct)
+        { 
+            ct.ThrowIfCancellationRequested();
+            await _machineCoinsService.LockCoinInMachine(coin, ct);
+            await _adminHub.Clients.All.LockMachineCoin(coin);
+            return NoContent();
+        }
+
+        [HttpPut("UnLock")]
+        public async Task<IActionResult> UnLockMachineCoins(MachineCoin coin, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+            await _machineCoinsService.UnLockCoinInMachine(coin, ct);
+            await _adminHub.Clients.All.UnLockMachineCoin(coin);
+            return NoContent();
+        }
+
         // POST: api/MachineCoins
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
@@ -94,8 +115,13 @@ namespace Web.Controllers.Api
             await _context.MachineCoins.AddAsync(machineCoin, ct);
             await _context.SaveChangesAsync(ct);
 
+            machineCoin = await _context.MachineCoins
+                .AsNoTracking()
+                .Include(d => d.Coin)
+                .SingleAsync(f => f.Id == machineCoin.Id, ct);
+
             await _adminHub.Clients.All.AddMachineCoin(machineCoin);
-            
+
             return CreatedAtAction("GetMachineCoin", new { id = machineCoin.Id }, machineCoin);
         }
 
@@ -117,6 +143,19 @@ namespace Web.Controllers.Api
             return machineCoin;
         }
 
+
+        [HttpDelete("Range")]
+        public async Task<IActionResult> DeleteRange([FromBody] List<int> machineCoinIds, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var machineCoinsToDelete = await _context.MachineCoins.Where(w => machineCoinIds.Contains(w.Id)).ToListAsync(ct);
+
+            _context.MachineCoins.RemoveRange(machineCoinsToDelete);
+            await _context.SaveChangesAsync(ct);
+            await _adminHub.Clients.All.DeleteMachineCoins(machineCoinsToDelete);
+            return NoContent();
+        }
         private bool MachineCoinExists(int id)
         {
             return _context.MachineCoins.Any(e => e.Id == id);

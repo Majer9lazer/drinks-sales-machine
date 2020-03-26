@@ -12,7 +12,8 @@ namespace Web.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             return services
-                .AddTransient<IMachineService, MachineService>();
+                .AddTransient<IMachineService, MachineService>()
+                .AddTransient<IMachineCoinsService, MachineCoinsService>();
         }
     }
 }

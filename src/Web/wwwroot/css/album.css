@@ -49,3 +49,7 @@ footer p {
 .lh-condensed {
     line-height: 1.25;
 }
+.disabledCoin {
+    pointer-events: none;
+    opacity: 0.4
+}

@@ -15,7 +15,6 @@ namespace Services
 {
     public interface IMachineService
     {
-        Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState, CancellationToken ct = default);
         Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default);
         Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default);
     }
@@ -27,21 +26,6 @@ namespace Services
         {
             _db = db;
             _logger = logger;
-        }
-
-        public async Task<MachineCoin> UpdateCoinState(int machineId, int coinId, byte coinState, CancellationToken ct = default)
-        {
-            ct.ThrowIfCancellationRequested();
-            var coinToBeUpdated = await _db.MachineCoins.SingleAsync(f => f.Coin.Id == coinId && f.Machine.Id == machineId, ct);
-
-            if (coinToBeUpdated != null)
-            {
-                coinToBeUpdated.CoinState = coinState;
-                _db.MachineCoins.Update(coinToBeUpdated);
-                await _db.SaveChangesAsync(ct);
-            }
-
-            return coinToBeUpdated;
         }
 
         public async Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default)

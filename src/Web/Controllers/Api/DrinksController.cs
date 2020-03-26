@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Persistence.Entities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Persistence.Data;
 
@@ -100,6 +101,23 @@ namespace Web.Controllers.Api
             return drink;
         }
 
+        [HttpDelete("MachineDrink/{drinkId}/{machineId}")]
+        public async Task<IActionResult> DeleteMachineDrink(int drinkId, int machineId, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+  
+            var machineDrink = await _context.MachineDrinks
+                .FirstOrDefaultAsync(f => f.DrinkId == drinkId && f.MachineId == machineId, ct);
+            if (machineDrink == null)
+            {
+                return NotFound();
+            }
+
+            _context.MachineDrinks.Remove(machineDrink);
+            await _context.SaveChangesAsync(ct);
+
+            return NoContent();
+        }
         private bool DrinkExists(int id)
         {
             return _context.Drinks.Any(e => e.Id == id);

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.SignalR;
 using Persistence.Entities;
 using Services;
 using System.Threading.Tasks;
@@ -7,8 +8,10 @@ namespace Web.Hubs
 {
     public interface IAdminOperationsClient
     {
+        Task DeleteMachineCoins(IEnumerable<MachineCoin> coinsToDelete);
         Task AddMachineCoin(MachineCoin machineCoin);
-        Task BlockMachineCoin(MachineCoin machineCoin);
+        Task LockMachineCoin(MachineCoin machineCoin);
+        Task UnLockMachineCoin(MachineCoin machineCoin);
 
         Task DeleteCoin(Coin coin);
         Task EditCoin(Coin coin);
@@ -24,12 +27,6 @@ namespace Web.Hubs
             _machineService = machineService;
         }
 
-        public async Task OnBlockCoinOperation(int coinId, int machineId)
-        {
-            var coinToBeBlocked = await _machineService.UpdateCoinState(machineId, coinId, 1);
-
-            await Clients.All.BlockMachineCoin(coinToBeBlocked);
-        }
 
         public async Task OnDeleteCoin(Coin coin)
         {

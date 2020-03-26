@@ -32,12 +32,78 @@
                                     {{machine.name}}
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-primary">
+
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" :data-target="'#coinsModal_'+machine.id">
                                         Coins <span class="badge badge-light">{{machine.coins.length}}</span>
                                     </button>
-                                    <button type="button" class="btn btn-dark">
+
+                                    <!-- Coins Modal -->
+                                    <div class="modal fade" :id="'coinsModal_'+machine.id" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Modal title</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @*<div class="card" style="width: 18rem;" v-for="coin in getUniqueCoins(machine)">
+                                                        <img :src="coin.coin.image.path" class="card-img-top" :alt="coin.coin.name">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">{{coin.coin.name}}</h5>
+                                                            <a href="#" class="btn btn-primary">Block</a>
+                                                            <a href="#" class="btn btn-primary">Un Block</a>
+                                                        </div>
+                                                    </div>*@
+
+                                                    <div class="card mb-3" style="max-width: 540px;" v-for="coin in getUniqueCoins(machine)">
+                                                        <div class="row no-gutters">
+                                                            <div class="col-md-4">
+                                                                <img :src="coin.coin.image.path" class="card-img" :alt="coin.coin.name">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="card-body">
+                                                                    <h5 class="card-title">{{coin.coin.name}}</h5>
+                                                                    <p>state - {{coin.coinState}}</p>
+                                                                    <button type="button" v-bind:disabled="coin.coinState!==0" @@click="lockMachineCoin(coin)" class="btn btn-outline-danger">lock</button>
+                                                                    <button type="button" v-bind:disabled="coin.coinState!==1" @@click="unLockMachineCoin(coin)" class="btn btn-outline-success">unlock</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="btn btn-dark" data-toggle="modal" :data-target="'#drinksModal_'+machine.id">
                                         Drinks <span class="badge badge-light">{{machine.drinks.length}}</span>
                                     </button>
+
+                                    <!-- Drinks Modal -->
+                                    <div class="modal fade" :id="'drinksModal_'+machine.id" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Modal title</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    ...
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
@@ -145,51 +211,50 @@
                 drinks: []
             },
 
-            created: async function () {
+            created: async function() {
                 this.machines = await this.getMachines();
                 this.coins = await this.getCoins();
                 this.drinks = await this.getDrinks();
             },
             methods: {
-                getMachines: async function () {
+                getMachines: async function() {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                deleteMachine: function (machine) {
+                deleteMachine: function(machine) {
                     adminOperationsConnection.invoke('OnDeleteMachine', machine);
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
-                onDeleteMachine: function (machine) {
+                onDeleteMachine: function(machine) {
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
-                getCoins: async function () {
+                getCoins: async function() {
                     return (await window.axios.get('/api/Coins')).data;
                 },
-                getDrinks: async function () {
+                getDrinks: async function() {
                     return (await window.axios.get('/api/Drinks')).data;
                 },
 
-                deleteCoinWithoutIndex: function (coin) {
+                deleteCoinWithoutIndex: function(coin) {
                     const index = this.coins.indexOf(coin);
                     return this.coins.splice(index, 1);
                 },
-                deleteCoin: async function (coin) {
+                deleteCoin: async function(coin) {
                     const coinDeleteResult =
                         await window.axios.delete(`/api/Coins/${coin.id}/${adminOperationsConnection.connectionId}`);
                     return this.deleteCoinWithoutIndex(coinDeleteResult);
                 },
-                addCoin: function (coin) {
+                addCoin: function(coin) {
                     this.coins.push(coin);
                 },
-                addMachineCoin(machineCoin) {
+                addMachineCoin: function(machineCoin) {
                     const machine = this.machines.find(f => f.id === machineCoin.machineId);
                     if (machine !== undefined && machine !== null) {
                         const machineIndex = this.machines.indexOf(machine);
                         machine.coins.push(machineCoin);
-                        this.machines.splice(machineIndex,1,machine);
+                        this.machines.splice(machineIndex, 1, machine);
                     }
                 },
-
-                editCoin: function (coin) {
+                editCoin: function(coin) {
                     const oldCoin = this.coins.find(f => f.id === coin.id);
 
                     if (oldCoin !== undefined) {
@@ -197,6 +262,35 @@
                         this.coins.splice(index, 1, coin);
                     } else {
                         console.error(`We didn't find coin with [id] (${coin.id}) in your array`);
+                    }
+                },
+                onDeleteMachineCoins: function(machineCoins) {
+                    const machineId = machineCoins[0].machineId;
+                    const machine = this.machines.find(f => f.id === machineId);
+
+                    for (let i = 0; i < machineCoins.length; i++) {
+                        const machineCoin = machine.coins.find(f => f.id === machineCoins[i].id);
+                        machine.coins.splice(machine.coins.indexOf(machineCoin), 1);
+                    }
+                    console.log(`deleted! machine (${machine.name}) deleted coins = `, machineCoins);
+                },
+                getUniqueCoins: function(machine) {
+                    return machine.coins
+                        .filter((value, index, self) => self.map(s => s.coin.id).indexOf(value.coin.id) === index)
+                        .sort((a, b) => (a.coin.value > b.coin.value) ? 1 : ((b.coin.value > a.coin.value) ? -1 : 0));
+                },
+                lockMachineCoin: async function (machineCoin) {
+                    console.log('machineCoin = ', machineCoin);
+                    if (machineCoin.coinState === 0) {
+                        await window.axios.put('/api/MachineCoins/Lock', machineCoin);
+                        machineCoin.coinState = 1;
+                        
+                    }
+                },
+                unLockMachineCoin: async function(machineCoin) {
+                    if (machineCoin.coinState === 1) {
+                        await window.axios.put('/api/MachineCoins/UnLock', machineCoin);
+                        machineCoin.coinState = 0;
                     }
                 }
             }
@@ -209,12 +303,15 @@
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        adminOperationsConnection.start().then(function () {
+        adminOperationsConnection.start().then(function() {
             console.log(`connected from admin panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
         });
         adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.deleteCoinWithoutIndex(coin));
+        adminOperationsConnection.on('DeleteMachineCoins',
+            (machineCoins) => administrationBlockVue.onDeleteMachineCoins(machineCoins));
         adminOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.addCoin(coin));
-        adminOperationsConnection.on('AddMachineCoin', (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
+        adminOperationsConnection.on('AddMachineCoin',
+            (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
         adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
         adminOperationsConnection.on('DeleteMachine', (machine) => administrationBlockVue.onDeleteMachine(machine));
     </script>

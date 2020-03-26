@@ -1,9 +1,10 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+
 @section Styles
 {
-    <link rel="stylesheet" href="~/css/album.css" />
+    <link rel="stylesheet" href="~/css/album.css"/>
 }
 
 <div class="container-fluid" id="mainBlock">
@@ -22,13 +23,13 @@
         </div>
     </div>
     <div class="row py-4 bg-white">
-        <div class="col-md-12">
-            <div class="float-left">
-                <h3 class="d-flex justify-content-between align-items-center">
-                    <span class="text-dark">Всего рублей в автомате : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
-                </h3>
-            </div>
-        </div>
+        @*<div class="col-md-12">
+                <div class="float-left">
+                    <h3 class="d-flex justify-content-between align-items-center">
+                        <span class="text-dark">Всего рублей в автомате : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
+                    </h3>
+                </div>
+            </div>*@
         <div class="col-md-12">
             <div class="float-left">
                 <h4 class="d-flex justify-content-between align-items-center">
@@ -57,7 +58,12 @@
                             <h4 class="card-text">{{drink.name}} <span class="badge badge-primary">{{drink.count}}</span></h4>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-success" v-bind:disabled="isEnabledToBuy(drink)===false" @@click="buyDrink(drink)">Купить</button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            v-bind:disabled="isEnabledToBuy(drink)===false"
+                                            @@click="buyDrink(drink)">
+                                        Купить
+                                    </button>
                                 </div>
                                 <small class="text-muted">{{drink.price}}. руб</small>
                             </div>
@@ -71,7 +77,7 @@
             <div class="row">
                 <div class="col-md-6 mb-1 pr-1 pl-1" v-for="coin in coins">
                     <div class="card text-dark text-center" title="Нажмите чтобы закинуть монету">
-                        <a href="javaScript:void(0);" @@click="pushCoinIntoMachine(coin)">
+                        <a href="javaScript:void(0);" v-bind:class="{'disabledCoin':coin.coinState===1}" @@click="pushCoinIntoMachine(coin)">
                             <img :src="coin.image.path" :alt="coin.name" class="card-img-top p-sm-2">
                         </a>
                         <h5 class="card-title">{{coin.name}}</h5>
@@ -80,18 +86,11 @@
             </div>
 
 
-            @*<form class="card p-2">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Promo code">
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-secondary">Redeem</button>
-                        </div>
-                    </div>
-                </form>*@
         </div>
     </div>
 
 </div>
+
 @section Scripts
 {
     <script>
@@ -102,29 +101,21 @@
                 localCoinsInMachine: [],
                 currentUserName: '@(User?.Identity?.Name)',
                 boughtDrinks: [],
-                coins:[]
+                coins: []
             },
             created: async function() {
                 this.machine = await this.getMostAppropriateMachine();
                 this.machine.drinks = this.getUniqueDrinksWithCount(this.machine.drinks);
-                this.machine.uniqueCoins = this.getUniqueCoinsWithCount(this.machine.coins);
                 this.localCoinsInMachine = this.getLocalCoinsInMachine();
-                this.coins = await this.getCoins();
+                this.coins = this.getUniqueCoinsWithCount(this.machine.coins);
             },
             computed: {
                 totalLocalCoinsInMachine: function() {
-                    return this.localCoinsInMachine.reduce((total, coin) => total + coin.value, 0);
-                },
-                totalCoinsInMachine: function() {
-                    if (this.machine !== undefined && this.machine !== null && this.machine.coins !== undefined) {
-                        return this.machine.coins.reduce((total, coin) => total + coin.coin.value, 0);
-                    } else {
-                        return 0;
-                    }
+                    return this.localCoinsInMachine.reduce((total, machineCoin) => total + machineCoin.coin.value, 0);
                 }
             },
             methods: {
-                getMostAppropriateMachine: async function() {
+                async getMostAppropriateMachine() {
                     return (await window.axios.get('/api/Machines/MostAppropriate')).data;
                 },
                 async pushCoinIntoMachine(coin) {
@@ -135,14 +126,14 @@
                         coinState: 0
                     };
 
-                    const createdCoin = (await window.axios.post('/api/MachineCoins', machineCoin)).data;
+                    const createdCoin = (await window.axios.post(`/api/MachineCoins/`, machineCoin)).data;
 
                     createdCoin.coin = coin;
-                    this.localCoinsInMachine.push(coin);
+                    this.localCoinsInMachine.push(createdCoin);
                     this.machine.coins.push(createdCoin);
-                    localStorage.setItem('localCoins', JSON.stringify(this.localCoinsInMachine));
+                    sessionStorage.setItem('localCoins', JSON.stringify(this.localCoinsInMachine));
                 },
-                buyDrink(drink) {
+                async buyDrink(drink) {
                     this.boughtDrinks.push(drink);
 
                     const machineDrink = this.machine.drinks.find(f => f.id === drink.id);
@@ -150,23 +141,59 @@
                     machineDrink.count -= 1;
                     this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
 
-                    this.withDrawMoney(machineDrink);
+                    await this.removeDrinkFromMachine(machineDrink.id);
+                    await this.withDrawMoney(machineDrink.price);
 
                 },
+                async removeDrinkFromMachine(drinkId) {
+                    await window.axios.delete(`/api/Drinks/MachineDrink/${drinkId}/${this.machine.id}`);
+                },
+                async withDrawMoney(machineDrinkPrice) {
 
-                isEnabledToBuy: function (drink) {
-                   return this.totalLocalCoinsInMachine > drink.price;
+                    const sortedLocalCoins = this.localCoinsInMachine
+                        .sort((a, b) => (a.coin.value < b.value) ? 1 : ((b.coin.value < a.value) ? -1 : 0));
+
+                    const withDrewCoins = [];
+
+                    for (let i = 0; i < sortedLocalCoins.length; i++) {
+                        if ((machineDrinkPrice - sortedLocalCoins[i].coin.value) >= 0) {
+                            machineDrinkPrice -= sortedLocalCoins[i].coin.value;
+                            withDrewCoins.push(sortedLocalCoins[i]);
+                        } else if (machineDrinkPrice === 0) {
+                            break;
+                        }
+                    }
+
+                    const deleteResult = await window.axios.delete('/api/MachineCoins/Range',
+                        { data: withDrewCoins.map(m => m.id) });
+
+                    console.log(deleteResult);
+                    for (let i = 0; i < withDrewCoins.length; i++) {
+                        this.localCoinsInMachine.splice(this.localCoinsInMachine.indexOf(withDrewCoins[i]), 1);
+                    }
+
+                    sessionStorage.setItem('localCoins', JSON.stringify(this.localCoinsInMachine));
+                    this.deleteMachineCoins(withDrewCoins);
                 },
 
-                withDrawMoney(machineDrink) {
-                    console.log('machineDrink = ', machineDrink);
+                deleteMachineCoins(machineCoins) {
+                    console.log('machineCoins = ', machineCoins);
 
+                    for (let i = 0; i < machineCoins.length; i++) {
+                        const machineCoin = this.machine.coins.find(f => f.id === machineCoins[i].id);
+                        console.log(`machineCoin[${i}] = `, machineCoin);
+                        this.machine.coins.splice(this.machine.coins.indexOf(machineCoin), 1);
+                    }
+                },
+                isEnabledToBuy(drink) {
+                    return this.totalLocalCoinsInMachine >= drink.price &&
+                        this.machine.drinks.filter(f => f.id === drink.id).length > 0;
                 },
                 getLocalCoinsInMachine() {
-                    const localCoins = JSON.parse(localStorage.getItem('localCoins'));
+                    const localCoins = JSON.parse(sessionStorage.getItem('localCoins'));
                     if (localCoins !== undefined && localCoins !== null && localCoins.length > 0) {
                         if (localCoins.length > this.machine.coins.length) {
-                            localStorage.setItem('localCoins', JSON.stringify([]));
+                            sessionStorage.setItem('localCoins', JSON.stringify([]));
                             return [];
                         }
 
@@ -188,15 +215,42 @@
                         .map(function(value, index, array) {
                             var coin = value.coin;
                             coin.count = array.reduce((total, x) => (x.coinId === coin.id) ? total + 1 : total, 0);
+                            coin.coinState = value.coinState;
                             return coin;
                         })
                         .filter((value, index, self) => self.map(s => s.id).indexOf(value.id) === index)
                         .sort((a, b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
                 },
-                async getCoins() {
-                    return (await window.axios.get('/api/Coins')).data;
+                onLockMachineCoin(machineCoin) {
+                    this.updateCoinState(machineCoin, 1);
+                },
+                onUnLockMachineCoin(machineCoin) {
+                    this.updateCoinState(machineCoin, 0);
+                },
+                updateCoinState(machineCoin, coinState) {
+                    const coin = this.coins.find(f => f.id === machineCoin.coinId);
+
+                    const coinIndex = this.coins.indexOf(coin);
+                    coin.coinState = coinState;
+                    this.coins.splice(coinIndex, 1, coin);
                 }
             }
         });
+    </script>
+
+    <script>
+        const adminOperationsConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/adminOperationsHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        adminOperationsConnection.start().then(function() {
+            console.log(`connected from machine panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
+        });
+
+        adminOperationsConnection.on('LockMachineCoin', (machineCoin) => mainBlockVue.onLockMachineCoin(machineCoin));
+        adminOperationsConnection.on('UnLockMachineCoin',
+            (machineCoin) => mainBlockVue.onUnLockMachineCoin(machineCoin));
+
     </script>
 }

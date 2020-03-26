@@ -31,6 +31,8 @@ namespace Web.Controllers.Api
             return await
                 _context.Machines.AsNoTracking()
                     .Include(d => d.Coins)
+                        .ThenInclude(d=>d.Coin)
+                            .ThenInclude(d=>d.Image)
                     .Include(d => d.Drinks)
                     .ToListAsync(ct);
         }
