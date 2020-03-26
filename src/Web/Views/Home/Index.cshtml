@@ -4,26 +4,6 @@
 @section Styles
 {
     <link rel="stylesheet" href="~/css/album.css" />
-    <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        @@media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-
-        .lh-condensed {
-            line-height: 1.25;
-        }
-    </style>
 }
 
 <div class="container-fluid" id="mainBlock">
@@ -34,7 +14,7 @@
             <p class="lead">
                 Так же вы можете
                 <a href="@Url.Action("Index", "Docs")" role="button">ознакомиться</a>
-                как работать с нашей системой и с её преимуществами.
+                как работать с нашей системой и её преимуществами.
             </p>
 
             <p class="h4">{{machine.name}}</p>
@@ -42,11 +22,30 @@
         </div>
     </div>
     <div class="row py-4 bg-white">
-        <h3 class="d-flex justify-content-between align-items-center">
-            <span class="text-dark">Закинуто монет в автомат : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
-        </h3>
+        <div class="col-md-12">
+            <div class="float-left">
+                <h3 class="d-flex justify-content-between align-items-center">
+                    <span class="text-dark">Всего рублей в автомате : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
+                </h3>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="float-left">
+                <h4 class="d-flex justify-content-between align-items-center">
+                    <span class="text-dark">Ваши средства в автомате : <span class="badge badge-secondary badge-info">{{totalLocalCoinsInMachine}}</span></span>
+                </h4>
+            </div>
+        </div>
 
+        <div class="col-md-12">
+            <div class="float-left">
+                <h4 class="d-flex justify-content-between align-items-center">
+                    <span class="text-dark">Куплено напитков <span class="badge badge-secondary badge-info">{{boughtDrinks.length}}</span></span>
+                </h4>
+            </div>
+        </div>
     </div>
+
     <div class="row py-4 bg-light">
         <div class="col-md-9">
             <div class="row">
@@ -58,7 +57,7 @@
                             <h4 class="card-text">{{drink.name}} <span class="badge badge-primary">{{drink.count}}</span></h4>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-success">Купить</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success" v-bind:disabled="isEnabledToBuy(drink)===false" @@click="buyDrink(drink)">Купить</button>
                                 </div>
                                 <small class="text-muted">{{drink.price}}. руб</small>
                             </div>
@@ -70,7 +69,7 @@
         </div>
         <div class="col-md-3 order-md-2">
             <div class="row">
-                <div class="col-md-6 mb-1 pr-1 pl-1" v-for="coin in machine.coins">
+                <div class="col-md-6 mb-1 pr-1 pl-1" v-for="coin in coins">
                     <div class="card text-dark text-center" title="Нажмите чтобы закинуть монету">
                         <a href="javaScript:void(0);" @@click="pushCoinIntoMachine(coin)">
                             <img :src="coin.image.path" :alt="coin.name" class="card-img-top p-sm-2">
@@ -101,32 +100,77 @@
             data: {
                 machine: {},
                 localCoinsInMachine: [],
-                currentUserName: '@(User?.Identity?.Name)'
+                currentUserName: '@(User?.Identity?.Name)',
+                boughtDrinks: [],
+                coins:[]
             },
             created: async function() {
                 this.machine = await this.getMostAppropriateMachine();
                 this.machine.drinks = this.getUniqueDrinksWithCount(this.machine.drinks);
-                this.machine.coins = this.getUniqueCoinsWithCount(this.machine.coins);
+                this.machine.uniqueCoins = this.getUniqueCoinsWithCount(this.machine.coins);
                 this.localCoinsInMachine = this.getLocalCoinsInMachine();
-
+                this.coins = await this.getCoins();
             },
             computed: {
-                totalCoinsInMachine: function() {
+                totalLocalCoinsInMachine: function() {
                     return this.localCoinsInMachine.reduce((total, coin) => total + coin.value, 0);
+                },
+                totalCoinsInMachine: function() {
+                    if (this.machine !== undefined && this.machine !== null && this.machine.coins !== undefined) {
+                        return this.machine.coins.reduce((total, coin) => total + coin.coin.value, 0);
+                    } else {
+                        return 0;
+                    }
                 }
             },
             methods: {
                 getMostAppropriateMachine: async function() {
                     return (await window.axios.get('/api/Machines/MostAppropriate')).data;
                 },
-                pushCoinIntoMachine(coin) {
+                async pushCoinIntoMachine(coin) {
+
+                    const machineCoin = {
+                        coinId: coin.id,
+                        machineId: this.machine.id,
+                        coinState: 0
+                    };
+
+                    const createdCoin = (await window.axios.post('/api/MachineCoins', machineCoin)).data;
+
+                    createdCoin.coin = coin;
                     this.localCoinsInMachine.push(coin);
+                    this.machine.coins.push(createdCoin);
                     localStorage.setItem('localCoins', JSON.stringify(this.localCoinsInMachine));
                 },
+                buyDrink(drink) {
+                    this.boughtDrinks.push(drink);
+
+                    const machineDrink = this.machine.drinks.find(f => f.id === drink.id);
+                    const machineDrinkIndex = this.machine.drinks.indexOf(machineDrink);
+                    machineDrink.count -= 1;
+                    this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
+
+                    this.withDrawMoney(machineDrink);
+
+                },
+
+                isEnabledToBuy: function (drink) {
+                   return this.totalLocalCoinsInMachine > drink.price;
+                },
+
+                withDrawMoney(machineDrink) {
+                    console.log('machineDrink = ', machineDrink);
+
+                },
                 getLocalCoinsInMachine() {
-                    const localCoins = localStorage.getItem('localCoins');
-                    if (localCoins !== undefined && localCoins !== null) {
-                        return JSON.parse(localCoins);
+                    const localCoins = JSON.parse(localStorage.getItem('localCoins'));
+                    if (localCoins !== undefined && localCoins !== null && localCoins.length > 0) {
+                        if (localCoins.length > this.machine.coins.length) {
+                            localStorage.setItem('localCoins', JSON.stringify([]));
+                            return [];
+                        }
+
+                        return localCoins;
                     }
                     return [];
                 },
@@ -148,6 +192,9 @@
                         })
                         .filter((value, index, self) => self.map(s => s.id).indexOf(value.id) === index)
                         .sort((a, b) => (a.value > b.value) ? 1 : ((b.value > a.value) ? -1 : 0));
+                },
+                async getCoins() {
+                    return (await window.axios.get('/api/Coins')).data;
                 }
             }
         });

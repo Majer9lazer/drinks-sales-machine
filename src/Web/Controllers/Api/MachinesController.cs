@@ -25,14 +25,14 @@ namespace Web.Controllers.Api
 
         // GET: api/Machines
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Machine>>> GetMachines()
+        public async Task<ActionResult<IEnumerable<Machine>>> GetMachines(CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
             return await
                 _context.Machines.AsNoTracking()
-                    .Where(w => w.Drinks.All(s => s.DrinkState == 0) && w.Coins.All(c => c.CoinState == 0))
                     .Include(d => d.Coins)
                     .Include(d => d.Drinks)
-                    .ToListAsync();
+                    .ToListAsync(ct);
         }
 
         // GET: api/Machines/Coins(5)
@@ -47,19 +47,20 @@ namespace Web.Controllers.Api
         /// </summary>
         /// <returns></returns>
         [HttpGet("MostAppropriate")]
-        public async Task<ActionResult<Machine>> GetMostAppropriateMachine()
+        public async Task<ActionResult<Machine>> GetMostAppropriateMachine(CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             return await _context.Machines.AsNoTracking()
-                    .Where(w => w.Drinks.All(d => d.DrinkState == 0))
-                    .OrderByDescending(o => o.Drinks.Count)
-                        .ThenByDescending(o => o.Coins.Count)
-                    .Include(d => d.Drinks)
+                .Include(d => d.Drinks)
                         .ThenInclude(d => d.Drink)
                             .ThenInclude(i => i.Image)
                     .Include(c => c.Coins)
                         .ThenInclude(c => c.Coin)
                         .ThenInclude(i => i.Image)
-                    .FirstOrDefaultAsync();
+                    .OrderByDescending(o => o.Drinks.Count(d => d.DrinkState == 0))
+                        .ThenByDescending(o => o.Coins.Count(c => c.CoinState == 0))
+                    .FirstOrDefaultAsync(ct);
         }
 
         // GET: api/Machines/5

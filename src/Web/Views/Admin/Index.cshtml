@@ -140,10 +140,6 @@
         var administrationBlockVue = new Vue({
             el: '#adminMainBlock',
             data: {
-                isFirstInit: true,
-                machinesState: 'empty',
-                coinsState: 'empty',
-                drinksState: 'empty',
                 machines: [],
                 coins: [],
                 drinks: []
@@ -158,11 +154,11 @@
                 getMachines: async function () {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                deleteMachine: function(machine) {
+                deleteMachine: function (machine) {
                     adminOperationsConnection.invoke('OnDeleteMachine', machine);
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
-                onDeleteMachine: function(machine) {
+                onDeleteMachine: function (machine) {
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
                 getCoins: async function () {
@@ -184,6 +180,15 @@
                 addCoin: function (coin) {
                     this.coins.push(coin);
                 },
+                addMachineCoin(machineCoin) {
+                    const machine = this.machines.find(f => f.id === machineCoin.machineId);
+                    if (machine !== undefined && machine !== null) {
+                        const machineIndex = this.machines.indexOf(machine);
+                        machine.coins.push(machineCoin);
+                        this.machines.splice(machineIndex,1,machine);
+                    }
+                },
+
                 editCoin: function (coin) {
                     const oldCoin = this.coins.find(f => f.id === coin.id);
 
@@ -209,6 +214,7 @@
         });
         adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.deleteCoinWithoutIndex(coin));
         adminOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.addCoin(coin));
+        adminOperationsConnection.on('AddMachineCoin', (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
         adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
         adminOperationsConnection.on('DeleteMachine', (machine) => administrationBlockVue.onDeleteMachine(machine));
     </script>

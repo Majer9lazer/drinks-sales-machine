@@ -7,10 +7,13 @@ namespace Web.Hubs
 {
     public interface IAdminOperationsClient
     {
+        Task AddMachineCoin(MachineCoin machineCoin);
         Task BlockMachineCoin(MachineCoin machineCoin);
+
         Task DeleteCoin(Coin coin);
         Task EditCoin(Coin coin);
         Task AddCoin(Coin coin);
+        
         Task DeleteMachine(Machine machine);
     }
     public class AdminOperationsHub : Hub<IAdminOperationsClient>

@@ -94,18 +94,18 @@ namespace Web.Controllers.Api
 
         // DELETE: api/Coins/5
         [HttpDelete("{id}/{connectionId}")]
-        public async Task<ActionResult<Coin>> DeleteCoin(int id, string connectionId)
+        public async Task<ActionResult<Coin>> DeleteCoin(int id, string connectionId, CancellationToken ct)
         {
             var coin = await _context.Coins.FindAsync(id);
             if (coin == null)
             {
                 return NotFound();
             }
+            _context.Coins.Remove(coin);
+            await _context.SaveChangesAsync(ct);
 
             await _adminOperationsHub.Clients.AllExcept(connectionId).DeleteCoin(coin);
-            //_context.Coins.Remove(coin);
-            //await _context.SaveChangesAsync();
-
+            
             return coin;
         }
 
