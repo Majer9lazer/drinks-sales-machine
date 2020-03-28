@@ -16,11 +16,10 @@ namespace Web.Controllers.Api
     public class MachinesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
-        public MachinesController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
+
+        public MachinesController(ApplicationDbContext context)
         {
             _context = context;
-            _adminHub = adminHub;
         }
 
         // GET: api/Machines
@@ -31,8 +30,8 @@ namespace Web.Controllers.Api
             return await
                 _context.Machines.AsNoTracking()
                     .Include(d => d.Coins)
-                        .ThenInclude(d=>d.Coin)
-                            .ThenInclude(d=>d.Image)
+                        .ThenInclude(d => d.Coin)
+                            .ThenInclude(d => d.Image)
                     .Include(d => d.Drinks)
                     .ToListAsync(ct);
         }
@@ -125,16 +124,17 @@ namespace Web.Controllers.Api
 
         // DELETE: api/Machines/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Machine>> DeleteMachine(int id)
+        public async Task<ActionResult<Machine>> DeleteMachine(int id, CancellationToken ct)
         {
-            var machine = await _context.Machines.FindAsync(id);
+            ct.ThrowIfCancellationRequested();
+            var machine = await _context.Machines.FirstOrDefaultAsync(f => f.Id == id, ct);
             if (machine == null)
             {
                 return NotFound();
             }
 
             _context.Machines.Remove(machine);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(ct);
 
             return machine;
         }

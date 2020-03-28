@@ -21,12 +21,6 @@ namespace Web.Hubs
     }
     public class AdminOperationsHub : Hub<IAdminOperationsClient>
     {
-        private readonly IMachineService _machineService;
-        public AdminOperationsHub(IMachineService machineService)
-        {
-            _machineService = machineService;
-        }
-
 
         public async Task OnDeleteCoin(Coin coin)
         {
@@ -42,10 +36,5 @@ namespace Web.Hubs
             await Clients.Others.AddCoin(coin);
         }
 
-        public async Task OnDeleteMachine(Machine machine)
-        {
-            var deletedMachine = await _machineService.DeleteMachine(machine, this.Context.ConnectionAborted);
-            await Clients.Others.DeleteMachine(deletedMachine);
-        }
     }
 }

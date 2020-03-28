@@ -59,6 +59,15 @@ namespace Web
             services.AddControllersWithViews().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
+            services.AddCors(options => options.AddPolicy("CorsPolicy",
+                builder =>
+                {
+                    builder
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithOrigins("http://localhost:5000","https://localhost:5001");
+                }));
+
             services.AddRazorPages();
             services.AddSignalR();
         }
@@ -84,17 +93,18 @@ namespace Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseCors("CorsPolicy");
+
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+          
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
 
-                endpoints.MapHub<PaymentHub>("/paymentHub");
                 endpoints.MapHub<AdminOperationsHub>("/adminOperationsHub");
             });
         }

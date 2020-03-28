@@ -220,11 +220,8 @@
                 getMachines: async function() {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                deleteMachine: function(machine) {
-                    adminOperationsConnection.invoke('OnDeleteMachine', machine);
-                    this.machines.splice(this.machines.indexOf(machine), 1);
-                },
-                onDeleteMachine: function(machine) {
+                deleteMachine: async function(machine) {
+                    await window.axios.delete(`/api/Machines/${machine.id}`);
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
                 getCoins: async function() {
@@ -279,12 +276,12 @@
                         .filter((value, index, self) => self.map(s => s.coin.id).indexOf(value.coin.id) === index)
                         .sort((a, b) => (a.coin.value > b.coin.value) ? 1 : ((b.coin.value > a.coin.value) ? -1 : 0));
                 },
-                lockMachineCoin: async function (machineCoin) {
+                lockMachineCoin: async function(machineCoin) {
                     console.log('machineCoin = ', machineCoin);
                     if (machineCoin.coinState === 0) {
                         await window.axios.put('/api/MachineCoins/Lock', machineCoin);
                         machineCoin.coinState = 1;
-                        
+
                     }
                 },
                 unLockMachineCoin: async function(machineCoin) {
@@ -313,6 +310,5 @@
         adminOperationsConnection.on('AddMachineCoin',
             (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
         adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
-        adminOperationsConnection.on('DeleteMachine', (machine) => administrationBlockVue.onDeleteMachine(machine));
     </script>
 }

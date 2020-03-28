@@ -1,7 +1,7 @@
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.IO;
 
 namespace Web
 {

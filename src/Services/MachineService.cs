@@ -16,7 +16,6 @@ namespace Services
     public interface IMachineService
     {
         Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken cancellationToken = default);
-        Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default);
     }
     public class MachineService : IMachineService
     {
@@ -26,14 +25,6 @@ namespace Services
         {
             _db = db;
             _logger = logger;
-        }
-
-        public async Task<Machine> DeleteMachine(Machine machine, CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            _db.Machines.Remove(machine);
-            await _db.SaveChangesAsync(cancellationToken);
-            return machine;
         }
 
         public async Task<Machine> CreateMachine(CreateMachineViewModel model, CancellationToken сt = default)
