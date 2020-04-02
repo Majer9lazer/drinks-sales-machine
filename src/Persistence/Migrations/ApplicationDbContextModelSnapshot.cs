@@ -15,7 +15,7 @@ namespace Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
+                .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -392,16 +392,11 @@ namespace Persistence.Migrations
                     b.Property<int>("MachineId")
                         .HasColumnType("int");
 
-                    b.Property<long?>("PaymentId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CoinId");
 
                     b.HasIndex("MachineId");
-
-                    b.HasIndex("PaymentId");
 
                     b.ToTable("MachineCoins");
                 });
@@ -416,9 +411,6 @@ namespace Persistence.Migrations
                     b.Property<int>("DrinkId")
                         .HasColumnType("int");
 
-                    b.Property<byte>("DrinkState")
-                        .HasColumnType("tinyint");
-
                     b.Property<int>("MachineId")
                         .HasColumnType("int");
 
@@ -429,42 +421,6 @@ namespace Persistence.Migrations
                     b.HasIndex("MachineId");
 
                     b.ToTable("MachineDrinks");
-                });
-
-            modelBuilder.Entity("Persistence.Entities.Payment", b =>
-                {
-                    b.Property<long>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<long?>("MachineDrinkId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("MachineId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PaymentDateUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte>("PaymentStatus")
-                        .HasColumnType("tinyint");
-
-                    b.Property<double>("ShortChange")
-                        .HasColumnType("float");
-
-                    b.HasKey("PaymentId");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("MachineDrinkId");
-
-                    b.HasIndex("MachineId");
-
-                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -549,10 +505,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("MachineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Persistence.Entities.Payment", null)
-                        .WithMany("MachineCoins")
-                        .HasForeignKey("PaymentId");
                 });
 
             modelBuilder.Entity("Persistence.Entities.MachineDrink", b =>
@@ -568,21 +520,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("MachineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Persistence.Entities.Payment", b =>
-                {
-                    b.HasOne("Persistence.Entities.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.HasOne("Persistence.Entities.MachineDrink", "MachineDrink")
-                        .WithMany()
-                        .HasForeignKey("MachineDrinkId");
-
-                    b.HasOne("Persistence.Entities.Machine", "Machine")
-                        .WithMany()
-                        .HasForeignKey("MachineId");
                 });
 #pragma warning restore 612, 618
         }

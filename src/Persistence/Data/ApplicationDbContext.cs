@@ -17,7 +17,6 @@ namespace Persistence.Data
         public DbSet<Image> Images { get; set; }
         public DbSet<Machine> Machines { get; set; }
         public DbSet<MachineCoin> MachineCoins { get; set; }
-        public DbSet<Payment> Payments { get; set; }
         public DbSet<MachineDrink> MachineDrinks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)

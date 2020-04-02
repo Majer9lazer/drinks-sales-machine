@@ -45,10 +45,9 @@ namespace Services
                 {
                     for (int i = 0; i < drinkViewModel.Quantity; i++)
                     {
-                        machineDrinks.Add(new MachineDrink()
+                        machineDrinks.Add(new MachineDrink
                         {
-                            DrinkId = drinkViewModel.DrinkId,
-                            DrinkState = 0
+                            DrinkId = drinkViewModel.DrinkId
                         });
                     }
                 }

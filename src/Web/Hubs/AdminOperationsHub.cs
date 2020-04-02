@@ -13,6 +13,9 @@ namespace Web.Hubs
         Task LockMachineCoin(MachineCoin machineCoin);
         Task UnLockMachineCoin(MachineCoin machineCoin);
 
+        Task AddMachineDrink(MachineDrink machineDrink);
+        Task RemoveMachineDrink(MachineDrink machineDrink);
+
         Task DeleteCoin(Coin coin);
         Task EditCoin(Coin coin);
         Task AddCoin(Coin coin);

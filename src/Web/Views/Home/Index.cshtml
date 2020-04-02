@@ -23,13 +23,6 @@
         </div>
     </div>
     <div class="row py-4 bg-white">
-        @*<div class="col-md-12">
-                <div class="float-left">
-                    <h3 class="d-flex justify-content-between align-items-center">
-                        <span class="text-dark">Всего рублей в автомате : <span class="badge badge-secondary badge-info">{{totalCoinsInMachine}}</span></span>
-                    </h3>
-                </div>
-            </div>*@
         <div class="col-md-12">
             <div class="float-left">
                 <h4 class="d-flex justify-content-between align-items-center">
@@ -229,10 +222,21 @@
                 },
                 updateCoinState(machineCoin, coinState) {
                     const coin = this.coins.find(f => f.id === machineCoin.coinId);
-
                     const coinIndex = this.coins.indexOf(coin);
                     coin.coinState = coinState;
                     this.coins.splice(coinIndex, 1, coin);
+                },
+                onAddMachineDrink(machineDrink) {
+                    machineDrink = this.machine.drinks.find(f => f.id === machineDrink.drinkId);
+                    const machineDrinkIndex = this.machine.drinks.indexOf(machineDrink);
+                    machineDrink.count += 1;
+                    this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
+                },
+                onRemoveMachineDrink(machineDrink) {
+                    machineDrink = this.machine.drinks.find(f => f.id === machineDrink.drinkId);
+                    const machineDrinkIndex = this.machine.drinks.indexOf(machineDrink);
+                    machineDrink.count -= 1;
+                    this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
                 }
             }
         });
@@ -249,8 +253,9 @@
         });
 
         adminOperationsConnection.on('LockMachineCoin', (machineCoin) => mainBlockVue.onLockMachineCoin(machineCoin));
-        adminOperationsConnection.on('UnLockMachineCoin',
-            (machineCoin) => mainBlockVue.onUnLockMachineCoin(machineCoin));
+        adminOperationsConnection.on('UnLockMachineCoin', (machineCoin) => mainBlockVue.onUnLockMachineCoin(machineCoin));
 
+        adminOperationsConnection.on('AddMachineDrink', (machineDrink) => mainBlockVue.onAddMachineDrink(machineDrink));
+        adminOperationsConnection.on('RemoveMachineDrink', (machineDrink) => mainBlockVue.onRemoveMachineDrink(machineDrink));
     </script>
 }

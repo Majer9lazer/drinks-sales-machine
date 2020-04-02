@@ -9,11 +9,5 @@
 
         public int MachineId { get; set; }
         public virtual Machine Machine { get; set; }
-
-        /// <summary>
-        /// Состояние напитка.
-        /// <example> 0 - активен, 1 - куплен</example>
-        /// </summary>
-        public byte DrinkState { get; set; }
     }
 }

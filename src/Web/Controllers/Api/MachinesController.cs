@@ -33,6 +33,8 @@ namespace Web.Controllers.Api
                         .ThenInclude(d => d.Coin)
                             .ThenInclude(d => d.Image)
                     .Include(d => d.Drinks)
+                        .ThenInclude(d => d.Drink)
+                            .ThenInclude(i => i.Image)
                     .ToListAsync(ct);
         }
 
@@ -59,7 +61,7 @@ namespace Web.Controllers.Api
                     .Include(c => c.Coins)
                         .ThenInclude(c => c.Coin)
                         .ThenInclude(i => i.Image)
-                    .OrderByDescending(o => o.Drinks.Count(d => d.DrinkState == 0))
+                    .OrderByDescending(o => o.Drinks.Count)
                         .ThenByDescending(o => o.Coins.Count(c => c.CoinState == 0))
                     .FirstOrDefaultAsync(ct);
         }

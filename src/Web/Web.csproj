@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="wwwroot\js\Admin\" />
+    <Folder Include="wwwroot\js\Home\" />
   </ItemGroup>
 
 

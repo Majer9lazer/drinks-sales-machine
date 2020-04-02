@@ -17,12 +17,11 @@ namespace Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMachineService _machineService;
-        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminOperationsHub;
-        public MachinesController(ApplicationDbContext context, IMachineService machineService, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminOperationsHub)
+
+        public MachinesController(ApplicationDbContext context, IMachineService machineService)
         {
             _context = context;
             _machineService = machineService;
-            _adminOperationsHub = adminOperationsHub;
         }
 
         // GET: Machines/Details/5
