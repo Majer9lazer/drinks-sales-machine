@@ -19,25 +19,9 @@ namespace Web.Hubs
         Task DeleteCoin(Coin coin);
         Task EditCoin(Coin coin);
         Task AddCoin(Coin coin);
-        
-        Task DeleteMachine(Machine machine);
+
+        Task EditDrink(Drink drink);
+        Task AddDrink(Drink drink);
     }
-    public class AdminOperationsHub : Hub<IAdminOperationsClient>
-    {
-
-        public async Task OnDeleteCoin(Coin coin)
-        {
-            await Clients.Others.DeleteCoin(coin);
-        }
-
-        public async Task OnEditCoin(Coin coin)
-        {
-            await Clients.Others.EditCoin(coin);
-        }
-        public async Task OnAddCoin(Coin coin)
-        {
-            await Clients.Others.AddCoin(coin);
-        }
-
-    }
+    public class AdminOperationsHub : Hub<IAdminOperationsClient>{}
 }

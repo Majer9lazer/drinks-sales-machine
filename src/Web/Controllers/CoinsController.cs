@@ -47,7 +47,6 @@ namespace Web.Controllers
         // GET: Coins/Create
         public IActionResult Create()
         {
-            ViewData["ImageId"] = new SelectList(_context.Images.AsNoTracking(), "Id", "Path");
             return View();
         }
 
@@ -56,18 +55,21 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Value,ImageId,Image")] Coin coin)
+        public async Task<IActionResult> Create([Bind("Id,Name,Value,ImageId")] Coin coin)
         {
             if (ModelState.IsValid)
             {
-                coin.ImageId = coin.Image.Id;
                 _context.Add(coin);
                 await _context.SaveChangesAsync();
+
+                await _context.Entry(coin)
+                    .Reference(i => i.Image)
+                    .LoadAsync();
+
                 await _adminHubContext.Clients.All.AddCoin(coin);
 
                 return RedirectToAction(nameof(Index), "Admin");
             }
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Path", coin.ImageId);
             return View(coin);
         }
 
@@ -84,7 +86,6 @@ namespace Web.Controllers
             {
                 return NotFound();
             }
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Path", coin.ImageId);
             return View(coin);
         }
 
@@ -93,7 +94,7 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Value,Image,ImageId")] Coin coin)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Value,ImageId")] Coin coin)
         {
             if (id != coin.Id)
             {
@@ -104,12 +105,14 @@ namespace Web.Controllers
             {
                 try
                 {
-                    coin.ImageId = coin.Image.Id;
                     _context.Update(coin);
                     var savedCount = await _context.SaveChangesAsync();
 
                     _logger.LogInformation("Saved Count While Updating Coin = {savedCount}", savedCount);
 
+                    await _context.Entry(coin)
+                        .Reference(i => i.Image)
+                        .LoadAsync();
                     await _adminHubContext.Clients.All.EditCoin(coin);
                 }
                 catch (DbUpdateConcurrencyException)
@@ -118,16 +121,12 @@ namespace Web.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
-                }
 
+                    throw;
+                }
 
                 return RedirectToAction(nameof(Index), "Admin");
             }
-            ViewData["ImageId"] = new SelectList(_context.Images, "Id", "Id", coin.ImageId);
             return View(coin);
         }
 

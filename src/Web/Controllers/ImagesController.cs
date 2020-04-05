@@ -1,43 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Persistence.Data;
 using Persistence.Entities;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Web.Hubs;
 
 namespace Web.Controllers
 {
     public class ImagesController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public ImagesController(ApplicationDbContext context)
+        private readonly IHubContext<ImageOperationsHub, IImageOperationsClient> _imageHub;
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<ImagesController> _logger;
+        public ImagesController(ApplicationDbContext context, IHubContext<ImageOperationsHub, IImageOperationsClient> imageHub, IWebHostEnvironment env, ILogger<ImagesController> logger)
         {
             _context = context;
+            _imageHub = imageHub;
+            _env = env;
+            _logger = logger;
         }
 
-      
-
-        // GET: Images/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var image = await _context.Images
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (image == null)
-            {
-                return NotFound();
-            }
-
-            return View(image);
-        }
 
         // GET: Images/Create
         public IActionResult Create()
@@ -50,66 +40,31 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Path")] Image image)
+        public async Task<IActionResult> Create([BindRequired]IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(image);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index), "Admin");
-            }
-            return View(image);
-        }
+                var fullPath = Path.Combine(_env.WebRootPath, "img", imageFile.FileName);
+                var image = new Image { Path = $"/img/{imageFile.FileName}"};
 
-        // GET: Images/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var image = await _context.Images.FindAsync(id);
-            if (image == null)
-            {
-                return NotFound();
-            }
-            return View(image);
-        }
-
-        // POST: Images/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Path")] Image image)
-        {
-            if (id != image.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
                 try
                 {
-                    _context.Update(image);
+                    await using var fileStream = new FileStream(fullPath, FileMode.Create);
+                    await imageFile.CopyToAsync(fileStream);
+
+                    _context.Add(image);
                     await _context.SaveChangesAsync();
+                    await _imageHub.Clients.All.AddImage(image);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (UnauthorizedAccessException e)
                 {
-                    if (!ImageExists(image.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    _logger.LogWarning(e, "Cannot access file path = {path}", fullPath);
+                    return BadRequest(e);
                 }
+
                 return RedirectToAction(nameof(Index), "Admin");
             }
-            return View(image);
+            return View();
         }
 
         // GET: Images/Delete/5
@@ -138,12 +93,9 @@ namespace Web.Controllers
             var image = await _context.Images.FindAsync(id);
             _context.Images.Remove(image);
             await _context.SaveChangesAsync();
+            await _imageHub.Clients.All.RemoveImage(image);
             return RedirectToAction(nameof(Index), "Admin");
         }
 
-        private bool ImageExists(int id)
-        {
-            return _context.Images.Any(e => e.Id == id);
-        }
     }
 }

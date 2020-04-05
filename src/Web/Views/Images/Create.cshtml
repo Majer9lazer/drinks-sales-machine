@@ -1,4 +1,4 @@
-﻿@model Persistence.Entities.Image
+﻿@model Microsoft.AspNetCore.Http.IFormFile
 
 @{
     ViewData["Title"] = "Create";
@@ -8,14 +8,22 @@
 
 <h4>Image</h4>
 <hr />
-<div class="row">
+<div class="row" id="createImageBlock">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
             <div class="form-group">
-                <label asp-for="Path" class="col-form-label"></label>
-                <input asp-for="Path" class="form-control" />
-                <span asp-validation-for="Path" class="text-danger"></span>
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="imageFile"
+                               name="imageFile"
+                               accept="image/png,image/svg+xml"
+                               @@change="onImageFileInputChange"
+                               aria-describedby="imageFile">
+                        <label class="custom-file-label" for="imageFile">{{imageFileName}}</label>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -27,4 +35,20 @@
 <div>
     <a asp-action="Index" asp-controller="Admin">Back to List</a>
 </div>
-
+@section Scripts
+{
+    <script>
+        var createImageBlockVue = new Vue({
+            el: '#createImageBlock',
+            data: {
+                imageFileName:'Choose file'
+            },
+            methods: {
+                onImageFileInputChange(event) {
+                    this.imageFileName = event.target.files[0].name;
+                    console.log(event.target.files[0]);
+                }
+            }
+        });
+    </script>
+}

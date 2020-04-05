@@ -4,19 +4,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Data;
 using Persistence.Entities;
+using Web.Hubs;
 
 namespace Web.Controllers
 {
     public class DrinksController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public DrinksController(ApplicationDbContext context)
+        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
+        public DrinksController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
         {
             _context = context;
+            _adminHub = adminHub;
         }
 
         // GET: Drinks/Details/5
@@ -48,12 +51,19 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Price,Name")] Drink drink)
+        public async Task<IActionResult> Create([Bind("Id,Price,Name,ImageId")] Drink drink)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(drink);
                 await _context.SaveChangesAsync();
+
+                await _context.Entry(drink)
+                    .Reference(i => i.Image)
+                    .LoadAsync();
+
+                await _adminHub.Clients.All.AddDrink(drink);
+
                 return RedirectToAction(nameof(Index),"Admin");
             }
             return View(drink);
@@ -80,7 +90,7 @@ namespace Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Price,Name")] Drink drink)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Price,Name,ImageId")] Drink drink)
         {
             if (id != drink.Id)
             {
@@ -93,6 +103,12 @@ namespace Web.Controllers
                 {
                     _context.Update(drink);
                     await _context.SaveChangesAsync();
+
+                    await _context.Entry(drink)
+                        .Reference(i => i.Image)
+                        .LoadAsync();
+
+                    await _adminHub.Clients.All.EditDrink(drink);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

@@ -56,16 +56,17 @@ namespace Web
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddControllersWithViews().AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options => 
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
-            services.AddCors(options => options.AddPolicy("CorsPolicy",
+            services.AddCors(options => options.AddPolicy("LocalhostCorsPolicy",
                 builder =>
                 {
                     builder
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .WithOrigins("http://localhost:5000","https://localhost:5001");
+                        .WithOrigins("http://localhost:5000", "https://localhost:5001");
                 }));
 
             services.AddRazorPages();
@@ -83,7 +84,7 @@ namespace Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                
                 app.UseHsts();
             }
 
@@ -93,19 +94,22 @@ namespace Web
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseCors("CorsPolicy");
+            app.UseCors("LocalhostCorsPolicy");
 
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-          
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapRazorPages();
 
                 endpoints.MapHub<AdminOperationsHub>("/adminOperationsHub");
+                endpoints.MapHub<CoinOperationsHub>("/coinOperationsHub");
+                endpoints.MapHub<DrinkOperationsHub>("/drinkOperationsHub");
+                endpoints.MapHub<ImageOperationsHub>("/imageOperationsHub");
             });
         }
     }

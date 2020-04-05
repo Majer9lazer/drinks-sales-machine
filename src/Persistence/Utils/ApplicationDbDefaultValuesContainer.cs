@@ -34,6 +34,7 @@ namespace Persistence.Utils
                 new Image {Id = 2, Path = "/img/cola.png"},
                 new Image {Id = 3, Path = "/img/pepsi.png"},
                 new Image {Id = 4, Path = "/img/fanta.png"},
+                new Image {Id = 5, Path = "/img/default.png"}
             };
         }
     }

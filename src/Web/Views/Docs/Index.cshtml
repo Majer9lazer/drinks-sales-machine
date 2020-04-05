@@ -1,12 +1,87 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Index";
 }
+<div class="container-fluid">
+    <h2>Документация по работе с системой</h2>
+    <div class="accordion" id="documentationAccordion">
+        <div class="card">
+            <div class="card-header" id="administrationDocs">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        #1 Работа с разделом "Администрирование"
+                    </button>
+                </h2>
+            </div>
 
-
-    <div class="container">
-        <h2>Документация по работе с системой</h2>
-        <img src="~/docs/gif/ezgif.com-video-to-gif.gif" />
+            <div id="collapseOne" class="collapse" aria-labelledby="administrationDocs" data-parent="#documentationAccordion">
+                <div class="card-body">
+                    <p>Доступ к данному разделу доступен только зарегистрированным пользователям с ролью администратора ("ADMIN").</p>
+                    @*<p>Login - admin@@mail.ru, Password - admin123.</p>*@
+                    <p>
+                        При успешной аутентификации пользователь попадает на страницу управления автоматом с тремя вкладками которые открываются/закрываются по нажатию на соответствующую кнопку (Machines,Coins,Drinks).
+                        Для создания новой единицы монеты, напитка или автомата нужно просто нажать на кнопку "+" рядом с кнопкой с названием объекта для добавления, к примеру "Machines","Coins","Drinks". Из названий всё понятно, что к чему относится.
+                    </p>
+                    <h4>Работа с вкладкой "Machines"</h4>
+                    <hr />
+                    <p>
+                        Записи об автоматах содержаться в таблице. Так как автоматов может быть много а не один.
+                    </p>
+                    <p>
+                        Под заголовком таблицы "Optional Info" располагается доп. информация о итоговом количестве монет и напитков.
+                    </p>
+                    <p>
+                        Нажав на каждую из кнопок будет показано модальное с управлением этих сущностей в конкретном автомате.
+                    </p>
+                    <p>Так же есть управление и удаление конкретного автомата, под заголовком таблицы "Operations"</p>
+                    <h4>Работа с вкладкой "Coins"</h4>
+                    <hr />
+                    <p>
+                        В этой вкладке отображены все монеты доступные в базе данных приложения,
+                        так же есть "Operations" которые отвечают за изменение и удаление той или иной монеты.
+                    </p>
+                    <h4>Работа с вкладкой "Drinks"</h4>
+                    <hr />
+                    <p>Реализована по аналогии с вкладкой "Coins" с такой же таблицей, с таким же набором операций для управления, но с одним доп. полем "Price" для отображения цены.</p>
+                    <h4>Работа с вкладкой "Images"</h4>
+                    <hr />
+                    <p>Данная вкладка служит для управления изображениями в системе. <b>Важно</b> : удаление изображения должно быть максимально обдуманным, потому что множество сущностей ссылаются на изображения, соответственно при удалении все ссылающиеся сущности будут удалены каскадно, т.к это правило системы.</p>
+                    <p>А также нельзя менять изображение, потому что смысл изображения которое меняем на новое теряется и нужно будет удалять старое изображение и добавлять новое, что в принципе является нежелательно в рамках управления сущностями.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="drinkSalesMachineDocs">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        #2 Работа с разделом "Автомат"
+                    </button>
+                </h2>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="drinkSalesMachineDocs" data-parent="#documentationAccordion">
+                <div class="card-body">
+                    <p>
+                        В принципе на этой вкладке, нет ничего сложного для понимания обычного пользователя.
+                    </p>
+                    <p>
+                        Есть информация о названии напитка с которым работает пользователь. Информация о сумме средств пользователя а автомате и о количестве купленных напитков в автомате.
+                    </p>
+                    <p>Рядом с названием напитка отображается количество напитков в автомате.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" id="interestingFeaturesDocs">
+                <h2 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        #3 Интересные функции и плюшки
+                    </button>
+                </h2>
+            </div>
+            <div id="collapseThree" class="collapse show" aria-labelledby="interestingFeaturesDocs" data-parent="#documentationAccordion">
+                <div class="card-body">
+                    
+                </div>
+            </div>
+        </div>
     </div>
-
-
+</div>

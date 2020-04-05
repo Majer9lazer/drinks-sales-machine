@@ -4,17 +4,19 @@
 <div class="container-fluid" id="adminMainBlock">
     <h3>Drink Sales Machine Administration</h3>
     <div class="accordion" id="accordionExample">
+
+        <!--Machines-->
         <div class="card">
             <div class="card-header" id="headingOne">
                 <h2 class="mb-0">
                     <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#machineListBlock" aria-expanded="true" aria-controls="collapseOne">
                         Machines
                     </button>
-                    <a href="@Url.Action("Create","Machines")" class="btn btn-primary">+</a>
+                    <a href="@Url.Action("Create", "Machines")" class="btn btn-primary">+</a>
                 </h2>
             </div>
 
-            <div id="machineListBlock" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+            <div id="machineListBlock" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
                 <div class="card-body">
                     <table id="machineList" class="table table-hover table-sm table-active">
                         <thead class="thead-dark">
@@ -123,7 +125,7 @@
                                 </td>
                                 <td>
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
-                                        <a :href="`@Url.Action("Edit","Machines")/${machine.id}`" class="btn btn-primary">Edit</a>
+                                        <a :href="`@Url.Action("Edit", "Machines")/${machine.id}`" class="btn btn-primary">Edit</a>
                                         <button type="button" class="btn btn-danger" @@click="deleteMachine(machine)">Delete</button>
                                     </div>
                                 </td>
@@ -141,17 +143,17 @@
                     <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#coinListBlock" aria-expanded="false" aria-controls="coinListBlock">
                         Coins
                     </button>
-                    <a href="@Url.Action("Create","Coins")" class="btn btn-primary">+</a>
+                    <a href="@Url.Action("Create", "Coins")" class="btn btn-primary">+</a>
                 </h2>
             </div>
             <div id="coinListBlock" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
                 <div class="card-body ">
-                    <table class="table table-bordered table-hover table-sm mx-auto" style="width:80%">
+                    <table class="table table-bordered table-hover table-sm mx-auto" style="width: 80%">
                         <thead class="thead-dark">
                             <tr>
                                 <th>Name</th>
                                 <th>Image</th>
-                                <th>Operation</th>
+                                <th>Operations</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -164,7 +166,7 @@
                                 </td>
                                 <td class="align-middle">
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
-                                        <a :href="`@Url.Action("Edit","Coins")/${coin.id}`" class="btn btn-primary">Edit</a>
+                                        <a :href="`@Url.Action("Edit", "Coins")/${coin.id}`" class="btn btn-primary">Edit</a>
                                         <button type="button" class="btn btn-danger" @@click="deleteCoin(coin)">Delete</button>
                                     </div>
                                 </td>
@@ -182,7 +184,7 @@
                     <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#drinkListBlock" aria-expanded="false" aria-controls="drinkListBlock">
                         Drinks
                     </button>
-                    <a href="@Url.Action("Create","Drinks")" class="btn btn-primary">+</a>
+                    <a href="@Url.Action("Create", "Drinks")" class="btn btn-primary">+</a>
                 </h2>
             </div>
             <div id="drinkListBlock" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
@@ -193,7 +195,7 @@
                                 <th>Name</th>
                                 <th>Price</th>
                                 <th>Image</th>
-                                <th>Operation</th>
+                                <th>Operations</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -201,13 +203,15 @@
                                 <td class="text-center align-middle" style="width: 7rem">
                                     <p class="h5">{{drink.name}}</p>
                                 </td>
-                                <td class="text-center align-middle"><p class="h4">{{drink.price}}</p></td>
+                                <td class="text-center align-middle">
+                                    <p class="h4">{{drink.price}}</p>
+                                </td>
                                 <td class="text-center" style="width: 7rem">
                                     <img :src="drink.image.path" class="align-content-center" width="64" height="64" :alt="drink.name">
                                 </td>
                                 <td class="align-middle">
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
-                                        <button type="button" class="btn btn-primary">Edit</button>
+                                        <a :href="`@Url.Action("Edit","Drinks")/${drink.id}`" class="btn btn-primary">Edit</a>
                                         <button type="button" class="btn btn-danger">Delete</button>
                                     </div>
                                 </td>
@@ -217,6 +221,51 @@
                 </div>
             </div>
         </div>
+
+        <!--Images-->
+        <div class="card">
+            <div class="card-header" id="imagesHeading">
+                <h2 class="mb-0">
+                    <button class="btn btn-outline-primary" type="button" data-toggle="collapse" data-target="#imageListBlock" aria-expanded="false" aria-controls="imageListBlock">
+                        Images
+                    </button>
+                    <a href="@Url.Action("Create", "Images")" class="btn btn-primary">+</a>
+                </h2>
+            </div>
+            <div id="imageListBlock" class="collapse show" aria-labelledby="imagesHeading" data-parent="#accordionExample">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Path</th>
+                                <th>Picture</th>
+                                <th>Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="image in images">
+                                <td class="text-center align-middle" style="width: 7rem">
+                                    <p class="h5">{{image.id}}</p>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <p class="h6">{{image.path}}</p>
+                                </td>
+                                <td class="text-center" style="width: 7rem">
+                                    <img :src="image.path" class="align-content-center" width="64" height="64" :alt="image.name">
+                                </td>
+                                <td class="align-middle">
+                                    <div class="float-right" role="group" aria-label="Coins operations buttons">
+                                        <a :href="`@Url.Action("Delete","Images")/${image.id}`" class="btn btn-danger">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -228,43 +277,44 @@
             data: {
                 machines: [],
                 coins: [],
-                drinks: []
+                drinks: [],
+                images: []
             },
 
-            created: async function () {
+            created: async function() {
                 this.machines = await this.getMachines();
                 this.coins = await this.getCoins();
                 this.drinks = await this.getDrinks();
+                this.images = await this.getImages();
             },
             methods: {
-                getMachines: async function () {
+                getMachines: async function() {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                deleteMachine: async function (machine) {
+                getCoins: async function() {
+                    return (await window.axios.get('/api/Coins')).data;
+                },
+                getDrinks: async function() {
+                    return (await window.axios.get('/api/Drinks')).data;
+                },
+                getImages: async function() {
+                    return (await window.axios.get('/api/Images')).data;
+                },
+                deleteMachine: async function(machine) {
                     await window.axios.delete(`/api/Machines/${machine.id}`);
                     this.machines.splice(this.machines.indexOf(machine), 1);
                 },
-                getCoins: async function () {
-                    return (await window.axios.get('/api/Coins')).data;
-                },
-                getDrinks: async function () {
-                    return (await window.axios.get('/api/Drinks')).data;
-                },
-
-                deleteCoinWithoutIndex: function (coin) {
-                    const index = this.coins.indexOf(coin);
+                onDeleteCoin: function(coin) {
+                    const index = this.coins.findIndex(f => f.id === coin.id);
                     return this.coins.splice(index, 1);
                 },
-                deleteCoin: async function (coin) {
-                    const coinDeleteResult =
-                        await window.axios.delete(
-                            `/api/Coins/${coin.id}/${adminOperationsConnection.connectionId}`);
-                    return this.deleteCoinWithoutIndex(coinDeleteResult);
+                deleteCoin: async function(coin) {
+                    await window.axios.delete(`/api/Coins/${coin.id}`);
                 },
-                addCoin: function (coin) {
+                addCoin: function(coin) {
                     this.coins.push(coin);
                 },
-                addMachineCoin: function (machineCoin) {
+                addMachineCoin: function(machineCoin) {
                     const machine = this.machines.find(f => f.id === machineCoin.machineId);
                     if (machine !== undefined && machine !== null) {
                         const machineIndex = this.machines.indexOf(machine);
@@ -272,17 +322,17 @@
                         this.machines.splice(machineIndex, 1, machine);
                     }
                 },
-                editCoin: function (coin) {
+                editCoin: function(coin) {
                     const oldCoin = this.coins.find(f => f.id === coin.id);
 
-                    if (oldCoin !== undefined) {
+                    if (oldCoin) {
                         const index = this.coins.indexOf(oldCoin);
                         this.coins.splice(index, 1, coin);
                     } else {
-                        console.error(`We didn't find coin with [id] (${coin.id}) in your array`);
+                        console.error(`We didn't find coin with [id] = (${coin.id}) in your array`);
                     }
                 },
-                onDeleteMachineCoins: function (machineCoins) {
+                onDeleteMachineCoins: function(machineCoins) {
                     const machineId = machineCoins[0].machineId;
                     const machine = this.machines.find(f => f.id === machineId);
 
@@ -290,16 +340,15 @@
                         const machineCoin = machine.coins.find(f => f.id === machineCoins[i].id);
                         machine.coins.splice(machine.coins.indexOf(machineCoin), 1);
                     }
-                    console.log(`deleted! machine (${machine.name}) deleted coins = `, machineCoins);
                 },
-                getUniqueCoins: function (machine) {
+                getUniqueCoins: function(machine) {
                     return machine.coins
                         .filter((value, index, self) => self.map(s => s.coin.id).indexOf(value.coin.id) === index)
                         .sort((a, b) => (a.coin.value > b.coin.value)
                             ? 1
                             : ((b.coin.value > a.coin.value) ? -1 : 0));
                 },
-                lockMachineCoin: async function (machineCoin) {
+                lockMachineCoin: async function(machineCoin) {
                     console.log('machineCoin = ', machineCoin);
                     if (machineCoin.coinState === 0) {
                         await window.axios.put('/api/MachineCoins/Lock', machineCoin);
@@ -307,15 +356,15 @@
 
                     }
                 },
-                unLockMachineCoin: async function (machineCoin) {
+                unLockMachineCoin: async function(machineCoin) {
                     if (machineCoin.coinState === 1) {
                         await window.axios.put('/api/MachineCoins/UnLock', machineCoin);
                         machineCoin.coinState = 0;
                     }
                 },
-                getUniqueDrinksWithCount: function (machine) {
+                getUniqueDrinksWithCount: function(machine) {
                     return machine.drinks
-                        .map(function (value, index, array) {
+                        .map(function(value, index, array) {
                             value.count =
                                 array.reduce((total, x) => (x.drinkId === value.drink.id) ? total + 1 : total, 0);
                             return value;
@@ -323,18 +372,27 @@
                         .filter((value, index, self) => self.map(s => s.drink.id).indexOf(value.drink.id) ===
                             index);
                 },
-                addMachineDrink: async function (machineDrink, machine) {
+                addMachineDrink: async function(machineDrink, machine) {
                     const createResponse =
                         await window.axios.post(
                             `/api/MachineDrinks/Create/${machineDrink.machineId}/${machineDrink.drinkId}`);
                     console.log('createResponse = ', createResponse);
                     machine.drinks.push(createResponse.data);
                 },
-                removeMachineDrink: async function (machineDrink, machine) {
+                removeMachineDrink: async function(machineDrink, machine) {
                     const deleteResponse = await window.axios.delete(`/api/MachineDrinks/${machineDrink.id}`);
                     console.log('deleteResponse = ', deleteResponse);
                     machineDrink = machine.drinks.find(f => f.id === machineDrink.id);
                     machine.drinks.splice(machine.drinks.indexOf(machineDrink), 1);
+                },
+                onAddImage: function (image) { this.images.push(image); },
+                onRemoveImage: function(image) {
+                    const imageIndex = this.images.indexOf(image);
+                    this.images.splice(imageIndex, 1);
+                },
+                onEditImage: function (image) {
+                    const oldImageIndex = this.images.findIndex(f => f.id === image.id);
+                    this.images.splice(oldImageIndex, 1, image);
                 }
             }
         });
@@ -346,15 +404,29 @@
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        adminOperationsConnection.start().then(function () {
+        adminOperationsConnection.start().then(function() {
             console.log(`connected from admin panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
         });
-        adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.deleteCoinWithoutIndex(coin));
+        adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.onDeleteCoin(coin));
         adminOperationsConnection.on('DeleteMachineCoins',
             (machineCoins) => administrationBlockVue.onDeleteMachineCoins(machineCoins));
         adminOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.addCoin(coin));
         adminOperationsConnection.on('AddMachineCoin',
             (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
         adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
+    </script>
+    <script>
+        const imageOperationsConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/imageOperationsHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        imageOperationsConnection.start().then(function() {
+            console.log(`connected from imageOperationsHub. imageOperationsConnection = ${imageOperationsConnection.connectionId}`);
+        });
+
+        imageOperationsConnection.on('AddImage', (image) => administrationBlockVue.onAddImage(image));
+        imageOperationsConnection.on('RemoveImage', (image) => administrationBlockVue.onRemoveImage(image));
+        imageOperationsConnection.on('EditImage', (image) => administrationBlockVue.onEditImage(image));
+
     </script>
 }

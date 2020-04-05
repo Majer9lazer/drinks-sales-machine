@@ -357,6 +357,11 @@ namespace Persistence.Migrations
                         {
                             Id = 4,
                             Path = "/img/fanta.png"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Path = "/img/default.png"
                         });
                 });
 

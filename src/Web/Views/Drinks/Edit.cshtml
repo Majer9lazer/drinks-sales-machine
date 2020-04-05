@@ -8,7 +8,7 @@
 
 <h4>Drink</h4>
 <hr />
-<div class="row">
+<div class="row" id="editDrinkBlock">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -24,6 +24,18 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label class="col-form-label">Path</label>
+                <select class="form-control" v-model="selectedImage">
+                    <option v-bind:value="image" v-for="image in images">{{image.path}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Image" class="col-form-label"></label>
+                <img class="img-thumbnail" :src="selectedImage.path">
+                <span asp-validation-for="Image.Path" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="ImageId" v-bind:value="selectedImage.id" />
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -34,3 +46,20 @@
     <a asp-action="Index" asp-controller="Admin">Back to List</a>
 </div>
 
+@section Scripts
+{
+    <script>
+        var editDrinkBlockVue = new Vue({
+            el: '#editDrinkBlock',
+            data: {
+                images: [],
+                selectedImageId:@Model.ImageId,
+                selectedImage: {}
+            },
+            created: async function() {
+                this.images = (await window.axios.get('/api/Images')).data;
+                this.selectedImage = this.images.find(f => f.id === this.selectedImageId);
+            }
+        });
+    </script>
+}

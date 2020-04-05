@@ -1,4 +1,6 @@
-﻿namespace Persistence.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Persistence.Entities
 {
     public class Drink
     {

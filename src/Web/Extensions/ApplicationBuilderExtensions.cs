@@ -23,8 +23,6 @@ namespace Web.Extensions
                 logger.LogInformation("Migrating...");
                 context.Database.Migrate();
                 logger.LogInformation($"Migration of {applicationDbContextName} successfully applied.");
-                logger.LogInformation("Seeding data...");
-                logger.LogInformation("Seeding data was successfully finished!");
             }
             catch (Exception e)
             {

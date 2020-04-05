@@ -24,14 +24,16 @@
             </div>
             <div class="form-group">
                 <label class="col-form-label">Path</label>
-                <select asp-for="Image.Id" class="form-control" v-on:change="imageSelectChange($event)" asp-items="ViewBag.ImageId"></select>
+                <select class="form-control" v-model="selectedImage">
+                    <option v-bind:value="image" v-for="image in images" :key="image.path">{{image.path}}</option>
+                </select>
             </div>
             <div class="form-group">
-                <label asp-for="Image" class="col-form-label"></label>
-                <img class="img-thumbnail" :src="selectedImagePath">
+                <label class="col-form-label">Image</label>
+                <img class="img-thumbnail" :src="selectedImage.path">
                 <span asp-validation-for="Image.Path" class="text-danger"></span>
             </div>
-            <input type="hidden" asp-for="Image.Path" v-bind:value="selectedImagePath" />
+            <input type="hidden" asp-for="ImageId" v-bind:value="selectedImage.id" />
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -49,12 +51,12 @@
         var addCoinBlockVue = new Vue({
             el: '#addCoinBlock',
             data: {
-                selectedImagePath: ''
+                selectedImage: {},
+                images: []
             },
-            methods: {
-                imageSelectChange: function (event) {
-                    this.selectedImagePath = event.target.selectedOptions[0].text;
-                }
+            created: async function () {
+                this.images = (await window.axios.get('/api/Images')).data;
+                this.selectedImage = this.images.find(f => f.id === 5);
             }
         });
     </script>
