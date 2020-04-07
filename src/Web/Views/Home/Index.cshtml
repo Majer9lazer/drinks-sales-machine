@@ -4,7 +4,7 @@
 
 @section Styles
 {
-    <link rel="stylesheet" href="~/css/album.css"/>
+    <link rel="stylesheet" href="~/css/album.css" />
 }
 
 <div class="container-fluid" id="mainBlock">
@@ -86,7 +86,6 @@
             data: {
                 machine: {},
                 localCoinsInMachine: [],
-                currentUserName: '@(User?.Identity?.Name)',
                 boughtDrinks: [],
                 coins: []
             },
@@ -122,18 +121,12 @@
                 },
                 async buyDrink(drink) {
                     this.boughtDrinks.push(drink);
-
                     const machineDrink = this.machine.drinks.find(f => f.id === drink.id);
-                    const machineDrinkIndex = this.machine.drinks.indexOf(machineDrink);
-                    machineDrink.count -= 1;
-                    this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
-
-                    await this.removeDrinkFromMachine(machineDrink.id);
+                    await this.removeDrinkFromMachine(machineDrink.id,this.machine.id);
                     await this.withDrawMoney(machineDrink.price);
-
                 },
-                async removeDrinkFromMachine(drinkId) {
-                    await window.axios.delete(`/api/Drinks/MachineDrink/${drinkId}/${this.machine.id}`);
+                async removeDrinkFromMachine(drinkId, machineId) {
+                    await window.axios.delete(`/api/MachineDrinks/${drinkId}/${machineId}`);
                 },
                 async withDrawMoney(machineDrinkPrice) {
 
@@ -154,7 +147,6 @@
                     const deleteResult = await window.axios.delete('/api/MachineCoins/Range',
                         { data: withDrewCoins.map(m => m.id) });
 
-                    console.log(deleteResult);
                     for (let i = 0; i < withDrewCoins.length; i++) {
                         this.localCoinsInMachine.splice(this.localCoinsInMachine.indexOf(withDrewCoins[i]), 1);
                     }
@@ -164,11 +156,8 @@
                 },
 
                 deleteMachineCoins(machineCoins) {
-                    console.log('machineCoins = ', machineCoins);
-
                     for (let i = 0; i < machineCoins.length; i++) {
                         const machineCoin = this.machine.coins.find(f => f.id === machineCoins[i].id);
-                        console.log(`machineCoin[${i}] = `, machineCoin);
                         this.machine.coins.splice(this.machine.coins.indexOf(machineCoin), 1);
                     }
                 },
@@ -231,6 +220,9 @@
                     const machineDrinkIndex = this.machine.drinks.indexOf(machineDrink);
                     machineDrink.count -= 1;
                     this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
+                },
+                onEditMachineName(machine) {
+                    this.machine.name = machine.name;
                 }
             }
         });
@@ -242,14 +234,16 @@
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-        adminOperationsConnection.start().then(function() {
+        adminOperationsConnection.start().then(function () {
             console.log(`connected from machine panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
         });
 
         adminOperationsConnection.on('LockMachineCoin', (machineCoin) => mainBlockVue.onLockMachineCoin(machineCoin));
-        adminOperationsConnection.on('UnLockMachineCoin', (machineCoin) => mainBlockVue.onUnLockMachineCoin(machineCoin));
+        adminOperationsConnection.on('UnLockMachineCoin',
+            (machineCoin) => mainBlockVue.onUnLockMachineCoin(machineCoin));
 
         adminOperationsConnection.on('AddMachineDrink', (machineDrink) => mainBlockVue.onAddMachineDrink(machineDrink));
         adminOperationsConnection.on('RemoveMachineDrink', (machineDrink) => mainBlockVue.onRemoveMachineDrink(machineDrink));
+        adminOperationsConnection.on('EditMachineName', (machine) => mainBlockVue.onEditMachineName(machine));
     </script>
 }

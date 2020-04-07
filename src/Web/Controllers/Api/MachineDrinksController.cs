@@ -42,17 +42,21 @@ namespace Web.Controllers.Api
                 _context.MachineDrinks.AsNoTracking()
                     .Include(d => d.Drink)
                     .FirstOrDefaultAsync(f => f.Id == machineDrink.Id, ct);
-            
+
             await _adminHub.Clients.All.AddMachineDrink(machineDrink);
-            
+
             return machineDrink;
         }
 
-        // DELETE: api/MachineDrinks/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<MachineDrink>> DeleteMachineDrink(long id, CancellationToken ct)
+        // DELETE: api/MachineDrinks/5/1
+        [HttpDelete("{drinkId}/{machineId}")]
+        public async Task<ActionResult<MachineDrink>> DeleteMachineDrink(int drinkId, int machineId, CancellationToken ct)
         {
-            var machineDrink = await _context.MachineDrinks.FindAsync(id);
+            ct.ThrowIfCancellationRequested();
+
+            var machineDrink = await _context.MachineDrinks
+                .AsNoTracking()
+                .FirstOrDefaultAsync(f => f.MachineId == machineId && f.DrinkId == drinkId, ct);
             if (machineDrink == null)
             {
                 return NotFound();
@@ -65,5 +69,26 @@ namespace Web.Controllers.Api
 
             return machineDrink;
         }
+
+        // DELETE: api/MachineDrinks/5
+        [HttpDelete("{drinkId}")]
+        public async Task<ActionResult<MachineDrink>> DeleteMachineDrink(long drinkId, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var machineDrink = await _context.MachineDrinks.FindAsync(drinkId);
+            if (machineDrink == null)
+            {
+                return NotFound();
+            }
+
+            _context.MachineDrinks.Remove(machineDrink);
+            await _context.SaveChangesAsync(ct);
+
+            await _adminHub.Clients.All.RemoveMachineDrink(machineDrink);
+
+            return machineDrink;
+        }
+
     }
 }

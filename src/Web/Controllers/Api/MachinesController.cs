@@ -16,10 +16,11 @@ namespace Web.Controllers.Api
     public class MachinesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-        public MachinesController(ApplicationDbContext context)
+        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
+        public MachinesController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
         {
             _context = context;
+            _adminHub = adminHub;
         }
 
         // GET: api/Machines
@@ -60,7 +61,7 @@ namespace Web.Controllers.Api
                             .ThenInclude(i => i.Image)
                     .Include(c => c.Coins)
                         .ThenInclude(c => c.Coin)
-                        .ThenInclude(i => i.Image)
+                            .ThenInclude(i => i.Image)
                     .OrderByDescending(o => o.Drinks.Count)
                         .ThenByDescending(o => o.Coins.Count(c => c.CoinState == 0))
                     .FirstOrDefaultAsync(ct);
@@ -68,9 +69,17 @@ namespace Web.Controllers.Api
 
         // GET: api/Machines/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Machine>> GetMachine(int id)
+        public async Task<ActionResult<Machine>> GetMachine(int id, CancellationToken ct)
         {
-            var machine = await _context.Machines.FindAsync(id);
+            var machine = await _context.Machines
+                .AsNoTracking()
+                .Include(d => d.Drinks)
+                .ThenInclude(d => d.Drink)
+                .ThenInclude(i => i.Image)
+                .Include(c => c.Coins)
+                .ThenInclude(c => c.Coin)
+                .ThenInclude(i => i.Image)
+                .FirstOrDefaultAsync(f => f.Id == id, ct);
 
             if (machine == null)
             {
@@ -138,6 +147,7 @@ namespace Web.Controllers.Api
             _context.Machines.Remove(machine);
             await _context.SaveChangesAsync(ct);
 
+            await _adminHub.Clients.All.RemoveMachine(machine);
             return machine;
         }
 

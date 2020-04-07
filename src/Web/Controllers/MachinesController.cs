@@ -17,11 +17,12 @@ namespace Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMachineService _machineService;
-
-        public MachinesController(ApplicationDbContext context, IMachineService machineService)
+        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHub;
+        public MachinesController(ApplicationDbContext context, IMachineService machineService, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHub)
         {
             _context = context;
             _machineService = machineService;
+            _adminHub = adminHub;
         }
 
         // GET: Machines/Details/5
@@ -55,9 +56,28 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateMachineViewModel model, CancellationToken ct)
         {
+            ct.ThrowIfCancellationRequested();
+
             if (ModelState.IsValid)
             {
-                await _machineService.CreateMachine(model, ct);
+                var machine = await _machineService.CreateMachine(model, ct);
+
+                await _context.Entry(machine)
+                    .Collection(d => d.Drinks)
+                    .Query()
+                    .Include(d => d.Drink)
+                    .ThenInclude(i => i.Image)
+                    .LoadAsync(ct);
+
+                await _context.Entry(machine)
+                    .Collection(c => c.Coins)
+                    .Query()
+                    .Include(c => c.Coin)
+                    .ThenInclude(i => i.Image)
+                    .LoadAsync(ct);
+
+                await _adminHub.Clients.All.AddMachine(machine);
+
                 return RedirectToAction(nameof(Index), "Admin");
             }
             return View(model);
@@ -97,6 +117,7 @@ namespace Web.Controllers
                 {
                     _context.Update(machine);
                     await _context.SaveChangesAsync();
+                    await _adminHub.Clients.All.EditMachineName(machine);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using Microsoft.AspNetCore.Http.Connections;
 using Newtonsoft.Json;
 using Persistence.Data;
 using Persistence.Entities;
@@ -57,7 +58,7 @@ namespace Web
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddControllersWithViews()
-                .AddNewtonsoftJson(options => 
+                .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
             services.AddCors(options => options.AddPolicy("LocalhostCorsPolicy",
@@ -66,11 +67,17 @@ namespace Web
                     builder
                         .AllowAnyMethod()
                         .AllowAnyHeader()
-                        .WithOrigins("http://localhost:5000", "https://localhost:5001");
+                        .WithOrigins("http://localhost:5000", "https://localhost:5001")
+                        .AllowCredentials();
                 }));
 
             services.AddRazorPages();
-            services.AddSignalR();
+            services.AddSignalR()
+                .AddNewtonsoftJsonProtocol(
+                    options =>
+                    {
+                        options.PayloadSerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,7 +91,7 @@ namespace Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                
+
                 app.UseHsts();
             }
 

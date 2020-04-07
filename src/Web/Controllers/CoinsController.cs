@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Persistence.Data;
 using Persistence.Entities;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Web.Hubs;
 
 namespace Web.Controllers
@@ -16,13 +14,13 @@ namespace Web.Controllers
     public class CoinsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IHubContext<AdminOperationsHub, IAdminOperationsClient> _adminHubContext;
         private readonly ILogger<CoinsController> _logger;
-        public CoinsController(ApplicationDbContext context, IHubContext<AdminOperationsHub, IAdminOperationsClient> adminHubContext, ILogger<CoinsController> logger)
+        private readonly IHubContext<CoinOperationsHub, ICoinOperationsClient> _coinHub;
+        public CoinsController(ApplicationDbContext context, ILogger<CoinsController> logger, IHubContext<CoinOperationsHub, ICoinOperationsClient> coinHub)
         {
             _context = context;
-            _adminHubContext = adminHubContext;
             _logger = logger;
+            _coinHub = coinHub;
         }
 
         // GET: Coins/Details/5
@@ -66,7 +64,7 @@ namespace Web.Controllers
                     .Reference(i => i.Image)
                     .LoadAsync();
 
-                await _adminHubContext.Clients.All.AddCoin(coin);
+                await _coinHub.Clients.All.AddCoin(coin);
 
                 return RedirectToAction(nameof(Index), "Admin");
             }
@@ -113,7 +111,7 @@ namespace Web.Controllers
                     await _context.Entry(coin)
                         .Reference(i => i.Image)
                         .LoadAsync();
-                    await _adminHubContext.Clients.All.EditCoin(coin);
+                    await _coinHub.Clients.All.EditCoin(coin);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

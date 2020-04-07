@@ -16,12 +16,9 @@ namespace Web.Hubs
         Task AddMachineDrink(MachineDrink machineDrink);
         Task RemoveMachineDrink(MachineDrink machineDrink);
 
-        Task DeleteCoin(Coin coin);
-        Task EditCoin(Coin coin);
-        Task AddCoin(Coin coin);
-
-        Task EditDrink(Drink drink);
-        Task AddDrink(Drink drink);
+        Task AddMachine(Machine machine);
+        Task RemoveMachine(Machine machine);
+        Task EditMachineName(Machine machine);
     }
     public class AdminOperationsHub : Hub<IAdminOperationsClient>{}
 }

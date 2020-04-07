@@ -31,7 +31,6 @@ namespace Services
         {
             сt.ThrowIfCancellationRequested();
             await using var tran = await _db.Database.BeginTransactionAsync(сt);
-
             try
             {
                 var machine = new Machine

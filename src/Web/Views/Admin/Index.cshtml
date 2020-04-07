@@ -107,7 +107,7 @@
                                                                     </button>
                                                                     <button type="button"
                                                                             v-bind:disabled="machineDrink.count<1"
-                                                                            @@click="removeMachineDrink(machineDrink,machine)"
+                                                                            @@click="removeMachineDrink(machineDrink)"
                                                                             class="btn btn-danger">
                                                                         -
                                                                     </button>
@@ -126,7 +126,7 @@
                                 <td>
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
                                         <a :href="`@Url.Action("Edit", "Machines")/${machine.id}`" class="btn btn-primary">Edit</a>
-                                        <button type="button" class="btn btn-danger" @@click="deleteMachine(machine)">Delete</button>
+                                        <button type="button" class="btn btn-danger" @@click="removeMachine(machine)">Delete</button>
                                     </div>
                                 </td>
                             </tr>
@@ -167,7 +167,7 @@
                                 <td class="align-middle">
                                     <div class="float-right" role="group" aria-label="Coins operations buttons">
                                         <a :href="`@Url.Action("Edit", "Coins")/${coin.id}`" class="btn btn-primary">Edit</a>
-                                        <button type="button" class="btn btn-danger" @@click="deleteCoin(coin)">Delete</button>
+                                        <button type="button" class="btn btn-danger" @@click="removeCoin(coin)">Delete</button>
                                     </div>
                                 </td>
                             </tr>
@@ -210,9 +210,9 @@
                                     <img :src="drink.image.path" class="align-content-center" width="64" height="64" :alt="drink.name">
                                 </td>
                                 <td class="align-middle">
-                                    <div class="float-right" role="group" aria-label="Coins operations buttons">
+                                    <div class="float-right" role="group" aria-label="Drinks operations buttons">
                                         <a :href="`@Url.Action("Edit","Drinks")/${drink.id}`" class="btn btn-primary">Edit</a>
-                                        <button type="button" class="btn btn-danger">Delete</button>
+                                        <button type="button" @@click="removeDrink(drink)" class="btn btn-danger">Delete</button>
                                     </div>
                                 </td>
                             </tr>
@@ -232,7 +232,7 @@
                     <a href="@Url.Action("Create", "Images")" class="btn btn-primary">+</a>
                 </h2>
             </div>
-            <div id="imageListBlock" class="collapse show" aria-labelledby="imagesHeading" data-parent="#accordionExample">
+            <div id="imageListBlock" class="collapse" aria-labelledby="imagesHeading" data-parent="#accordionExample">
                 <div class="card-body">
                     <table class="table table-bordered table-hover table-sm">
                         <thead class="thead-dark">
@@ -255,7 +255,7 @@
                                     <img :src="image.path" class="align-content-center" width="64" height="64" :alt="image.name">
                                 </td>
                                 <td class="align-middle">
-                                    <div class="float-right" role="group" aria-label="Coins operations buttons">
+                                    <div class="float-right" role="group" aria-label="image operations buttons">
                                         <a :href="`@Url.Action("Delete","Images")/${image.id}`" class="btn btn-danger">Delete</a>
                                     </div>
                                 </td>
@@ -281,40 +281,59 @@
                 images: []
             },
 
-            created: async function() {
+            created: async function () {
                 this.machines = await this.getMachines();
                 this.coins = await this.getCoins();
                 this.drinks = await this.getDrinks();
                 this.images = await this.getImages();
             },
             methods: {
-                getMachines: async function() {
+                getMachines: async function () {
                     return (await window.axios.get('/api/Machines')).data;
                 },
-                getCoins: async function() {
+                getCoins: async function () {
                     return (await window.axios.get('/api/Coins')).data;
                 },
-                getDrinks: async function() {
+                getDrinks: async function () {
                     return (await window.axios.get('/api/Drinks')).data;
                 },
-                getImages: async function() {
+                getImages: async function () {
                     return (await window.axios.get('/api/Images')).data;
                 },
-                deleteMachine: async function(machine) {
+
+                removeMachine: async function (machine) {
                     await window.axios.delete(`/api/Machines/${machine.id}`);
-                    this.machines.splice(this.machines.indexOf(machine), 1);
                 },
-                onDeleteCoin: function(coin) {
+                onRemoveMachine: function (machine) {
+                    const machineIndex = this.machines.findIndex(f => f.id === machine.id);
+                    this.machines.splice(machineIndex, 1);
+                },
+                onAddMachine: function(machine) {
+                    this.machines.push(machine);
+                },
+                onEditMachineName: function(editedMachine) {
+                    const machine = this.machines.find(f => f.id === editedMachine.id);
+                    const machineIndex = this.machines.indexOf(machine);
+                    machine.name = editedMachine.name;
+                    this.machines.splice(machineIndex, 1, machine);
+                },
+
+                removeCoin: async function (coin) {
+                    await window.axios.delete(`/api/Coins/${coin.id}`);
+                },
+                onAddCoin: function (coin) {
+                    this.coins.push(coin);
+                },
+                onRemoveCoin: function (coin) {
                     const index = this.coins.findIndex(f => f.id === coin.id);
                     return this.coins.splice(index, 1);
                 },
-                deleteCoin: async function(coin) {
-                    await window.axios.delete(`/api/Coins/${coin.id}`);
+                onEditCoin: function (coin) {
+                    const oldCoinIndex = this.coins.findIndex(f => f.id === coin.id);
+                    this.coins.splice(oldCoinIndex, 1, coin);
                 },
-                addCoin: function(coin) {
-                    this.coins.push(coin);
-                },
-                addMachineCoin: function(machineCoin) {
+
+                onAddMachineCoin: function (machineCoin) {
                     const machine = this.machines.find(f => f.id === machineCoin.machineId);
                     if (machine !== undefined && machine !== null) {
                         const machineIndex = this.machines.indexOf(machine);
@@ -322,17 +341,7 @@
                         this.machines.splice(machineIndex, 1, machine);
                     }
                 },
-                editCoin: function(coin) {
-                    const oldCoin = this.coins.find(f => f.id === coin.id);
-
-                    if (oldCoin) {
-                        const index = this.coins.indexOf(oldCoin);
-                        this.coins.splice(index, 1, coin);
-                    } else {
-                        console.error(`We didn't find coin with [id] = (${coin.id}) in your array`);
-                    }
-                },
-                onDeleteMachineCoins: function(machineCoins) {
+                onDeleteMachineCoins: function (machineCoins) {
                     const machineId = machineCoins[0].machineId;
                     const machine = this.machines.find(f => f.id === machineId);
 
@@ -341,14 +350,14 @@
                         machine.coins.splice(machine.coins.indexOf(machineCoin), 1);
                     }
                 },
-                getUniqueCoins: function(machine) {
+                getUniqueCoins: function (machine) {
                     return machine.coins
                         .filter((value, index, self) => self.map(s => s.coin.id).indexOf(value.coin.id) === index)
                         .sort((a, b) => (a.coin.value > b.coin.value)
                             ? 1
                             : ((b.coin.value > a.coin.value) ? -1 : 0));
                 },
-                lockMachineCoin: async function(machineCoin) {
+                lockMachineCoin: async function (machineCoin) {
                     console.log('machineCoin = ', machineCoin);
                     if (machineCoin.coinState === 0) {
                         await window.axios.put('/api/MachineCoins/Lock', machineCoin);
@@ -356,15 +365,15 @@
 
                     }
                 },
-                unLockMachineCoin: async function(machineCoin) {
+                unLockMachineCoin: async function (machineCoin) {
                     if (machineCoin.coinState === 1) {
                         await window.axios.put('/api/MachineCoins/UnLock', machineCoin);
                         machineCoin.coinState = 0;
                     }
                 },
-                getUniqueDrinksWithCount: function(machine) {
+                getUniqueDrinksWithCount: function (machine) {
                     return machine.drinks
-                        .map(function(value, index, array) {
+                        .map(function (value, index, array) {
                             value.count =
                                 array.reduce((total, x) => (x.drinkId === value.drink.id) ? total + 1 : total, 0);
                             return value;
@@ -372,28 +381,47 @@
                         .filter((value, index, self) => self.map(s => s.drink.id).indexOf(value.drink.id) ===
                             index);
                 },
-                addMachineDrink: async function(machineDrink, machine) {
+                addMachineDrink: async function (machineDrink, machine) {
                     const createResponse =
                         await window.axios.post(
                             `/api/MachineDrinks/Create/${machineDrink.machineId}/${machineDrink.drinkId}`);
                     console.log('createResponse = ', createResponse);
                     machine.drinks.push(createResponse.data);
                 },
-                removeMachineDrink: async function(machineDrink, machine) {
-                    const deleteResponse = await window.axios.delete(`/api/MachineDrinks/${machineDrink.id}`);
-                    console.log('deleteResponse = ', deleteResponse);
-                    machineDrink = machine.drinks.find(f => f.id === machineDrink.id);
-                    machine.drinks.splice(machine.drinks.indexOf(machineDrink), 1);
+                removeMachineDrink: async function (machineDrink) {
+                    await window.axios.delete(`/api/MachineDrinks/${machineDrink.id}`);
+                },
+                onRemoveMachineDrink: function (machineDrink) {
+                    const machine = this.machines.find(f => f.id === machineDrink.machineId);
+                    const machineDrinkIndex = machine.drinks.findIndex(f => f.id === machineDrink.id);
+                    machine.drinks.splice(machineDrinkIndex, 1);
                 },
                 onAddImage: function (image) { this.images.push(image); },
-                onRemoveImage: function(image) {
+                onRemoveImage: function (image) {
                     const imageIndex = this.images.indexOf(image);
                     this.images.splice(imageIndex, 1);
                 },
                 onEditImage: function (image) {
                     const oldImageIndex = this.images.findIndex(f => f.id === image.id);
                     this.images.splice(oldImageIndex, 1, image);
-                }
+                },
+
+                removeDrink: async function (drink) {
+                    await window.axios.delete(`/api/Drinks/${drink.id}`);
+                },
+                onAddDrink: function (drink) {
+                    this.drinks.push(drink);
+                },
+                onRemoveDrink: function (drink) {
+                    const drinkIndex = this.drinks.findIndex(f => f.id === drink.id);
+                    this.drinks.splice(drinkIndex, 1);
+                },
+                onEditDrink: function (drink) {
+                    const oldDrinkIndex = this.drinks.findIndex(f => f.id === drink.id);
+                    this.drinks.splice(oldDrinkIndex, 1, drink);
+                },
+
+
             }
         });
     </script>
@@ -401,32 +429,62 @@
     <script>
         const adminOperationsConnection = new signalR.HubConnectionBuilder()
             .withUrl("/adminOperationsHub")
-            .configureLogging(signalR.LogLevel.Information)
+            .configureLogging(signalR.LogLevel.Trace)
             .build();
 
-        adminOperationsConnection.start().then(function() {
-            console.log(`connected from admin panel. ConnectionId = ${adminOperationsConnection.connectionId}`);
+        adminOperationsConnection.start().then(function () {
+            console.log(`[adminOperationsConnection] connectionId = ${adminOperationsConnection.connectionId}`);
         });
-        adminOperationsConnection.on('DeleteCoin', (coin) => administrationBlockVue.onDeleteCoin(coin));
-        adminOperationsConnection.on('DeleteMachineCoins',
-            (machineCoins) => administrationBlockVue.onDeleteMachineCoins(machineCoins));
-        adminOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.addCoin(coin));
-        adminOperationsConnection.on('AddMachineCoin',
-            (machineCoin) => administrationBlockVue.addMachineCoin(machineCoin));
-        adminOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.editCoin(coin));
+        adminOperationsConnection.on('DeleteMachineCoins', (machineCoins) => administrationBlockVue.onDeleteMachineCoins(machineCoins));
+        adminOperationsConnection.on('AddMachineCoin', (machineCoin) => administrationBlockVue.onAddMachineCoin(machineCoin));
+        adminOperationsConnection.on('RemoveMachineDrink', (machineDrink) => administrationBlockVue.onRemoveMachineDrink(machineDrink));
+        adminOperationsConnection.on('AddMachine', (machine) => administrationBlockVue.onAddMachine(machine));
+        adminOperationsConnection.on('RemoveMachine', (machine) => administrationBlockVue.onRemoveMachine(machine));
+        adminOperationsConnection.on('EditMachineName', (machine) => administrationBlockVue.onEditMachineName(machine));
+        adminOperationsConnection.onclose((error) => {
+            console.log('error in adminOperationsConnection, err = ', error);
+        });
     </script>
+
     <script>
         const imageOperationsConnection = new signalR.HubConnectionBuilder()
             .withUrl("/imageOperationsHub")
             .configureLogging(signalR.LogLevel.Information)
             .build();
-        imageOperationsConnection.start().then(function() {
-            console.log(`connected from imageOperationsHub. imageOperationsConnection = ${imageOperationsConnection.connectionId}`);
+        imageOperationsConnection.start().then(function () {
+            console.log(`[imageOperationsHub] connectionId = ${imageOperationsConnection.connectionId}`);
         });
 
         imageOperationsConnection.on('AddImage', (image) => administrationBlockVue.onAddImage(image));
         imageOperationsConnection.on('RemoveImage', (image) => administrationBlockVue.onRemoveImage(image));
         imageOperationsConnection.on('EditImage', (image) => administrationBlockVue.onEditImage(image));
+    </script>
 
+    <script>
+        const drinkOperationsConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/drinkOperationsHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        drinkOperationsConnection.start().then(function () {
+            console.log(`[drinkOperationsHub] connectionId = ${drinkOperationsConnection.connectionId}`);
+        });
+
+        drinkOperationsConnection.on('AddDrink', (drink) => administrationBlockVue.onAddDrink(drink));
+        drinkOperationsConnection.on('RemoveDrink', (drink) => administrationBlockVue.onRemoveDrink(drink));
+        drinkOperationsConnection.on('EditDrink', (drink) => administrationBlockVue.onEditDrink(drink));
+    </script>
+
+    <script>
+        const coinOperationsConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/coinOperationsHub")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        coinOperationsConnection.start().then(function () {
+            console.log(`[coinOperationsHub] connectionId = ${coinOperationsConnection.connectionId}`);
+        });
+
+        coinOperationsConnection.on('AddCoin', (coin) => administrationBlockVue.onAddCoin(coin));
+        coinOperationsConnection.on('RemoveCoin', (coin) => administrationBlockVue.onRemoveCoin(coin));
+        coinOperationsConnection.on('EditCoin', (coin) => administrationBlockVue.onEditCoin(coin));
     </script>
 }
