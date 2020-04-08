@@ -1,7 +1,9 @@
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.IO;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace Web
 {
@@ -10,6 +12,7 @@ namespace Web
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
+            
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
