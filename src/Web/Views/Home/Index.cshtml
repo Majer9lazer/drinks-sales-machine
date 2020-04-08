@@ -89,14 +89,14 @@
                 boughtDrinks: [],
                 coins: []
             },
-            created: async function() {
+            created: async function () {
                 this.machine = await this.getMostAppropriateMachine();
                 this.machine.drinks = this.getUniqueDrinksWithCount(this.machine.drinks);
                 this.localCoinsInMachine = this.getLocalCoinsInMachine();
                 this.coins = this.getUniqueCoinsWithCount(this.machine.coins);
             },
             computed: {
-                totalLocalCoinsInMachine: function() {
+                totalLocalCoinsInMachine: function () {
                     return this.localCoinsInMachine.reduce((total, machineCoin) => total + machineCoin.coin.value, 0);
                 }
             },
@@ -122,7 +122,7 @@
                 async buyDrink(drink) {
                     this.boughtDrinks.push(drink);
                     const machineDrink = this.machine.drinks.find(f => f.id === drink.id);
-                    await this.removeDrinkFromMachine(machineDrink.id,this.machine.id);
+                    await this.removeDrinkFromMachine(machineDrink.id, this.machine.id);
                     await this.withDrawMoney(machineDrink.price);
                 },
                 async removeDrinkFromMachine(drinkId, machineId) {
@@ -179,7 +179,7 @@
                 },
                 getUniqueDrinksWithCount(drinks) {
                     return drinks
-                        .map(function(value, index, array) {
+                        .map(function (value, index, array) {
                             var drink = value.drink;
                             drink.count = array.reduce((total, x) => (x.drinkId === drink.id) ? total + 1 : total, 0);
                             return drink;
@@ -188,7 +188,7 @@
                 },
                 getUniqueCoinsWithCount(coins) {
                     return coins
-                        .map(function(value, index, array) {
+                        .map(function (value, index, array) {
                             var coin = value.coin;
                             coin.count = array.reduce((total, x) => (x.coinId === coin.id) ? total + 1 : total, 0);
                             coin.coinState = value.coinState;
@@ -222,7 +222,8 @@
                     this.machine.drinks.splice(machineDrinkIndex, 1, machineDrink);
                 },
                 onEditMachineName(machine) {
-                    this.machine.name = machine.name;
+                    if (machine.id === this.machine.id)
+                        this.machine.name = machine.name;
                 }
             }
         });
