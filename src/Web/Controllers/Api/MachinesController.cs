@@ -127,7 +127,7 @@ namespace Web.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<Machine>> PostMachine(Machine machine)
         {
-            _context.Machines.Add(machine);
+            await _context.Machines.AddAsync(machine);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetMachine", new { id = machine.Id }, machine);
